@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zim Wiki</title>
+<style>
+:root {
+  --sidebar-w: 260px;
+  --header-h: 44px;
+  --bg: #ffffff;
+  --sidebar-bg: #f5f5f5;
+  --border: #e0e0e0;
+  --text: #1a1a1a;
+  --muted: #777;
+  --accent: #3b82f6;
+  --accent-dark: #2563eb;
+  --danger: #dc2626;
+  --code-bg: #f3f4f6;
+  --hover: rgba(0,0,0,0.05);
+  --active-bg: #dbeafe;
+  --active-text: #1d4ed8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#sidebar-top {
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--border);
+}
+#notebook-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 2px 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#search-box {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 13px;
+  outline: none;
+  background: white;
+}
+#search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #dbeafe; }
+
+#tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 5px 0;
+  min-height: 0;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 2px 6px;
+  margin: 1px 4px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  gap: 3px;
+}
+.tree-row:hover { background: var(--hover); }
+.tree-row.active { background: var(--active-bg); color: var(--active-text); }
+.tree-toggle {
+  width: 14px;
+  font-size: 9px;
+  color: var(--muted);
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.tree-row.active .tree-toggle { color: var(--active-text); }
+.tree-icon { font-size: 13px; flex-shrink: 0; }
+.tree-label {
+  flex: 1;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.tree-children { display: none; }
+.tree-children.open { display: block; }
+
+#sidebar-actions {
+  border-top: 1px solid var(--border);
+  padding: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+/* ── MAIN ── */
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+#toolbar {
+  height: var(--header-h);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 8px;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+#page-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}
+#page-title.loaded { color: var(--text); }
+#toolbar-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+#content-area {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+#view-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding: 36px 56px;
+}
+#view-inner { max-width: 780px; }
+#editor-pane {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  min-height: 0;
+}
+#editor {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 28px 56px;
+  font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  resize: none;
+  background: white;
+}
+#search-pane {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 56px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  background: white;
+  color: var(--text);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.btn:hover { background: var(--sidebar-bg); }
+.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.btn.primary:hover { background: var(--accent-dark); }
+.btn.danger { background: var(--danger); color: white; border-color: var(--danger); }
+.btn.small { padding: 4px 10px; font-size: 12px; flex: 1; }
+
+/* ── MODAL ── */
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+#modal-overlay.open { display: flex; }
+#modal {
+  background: white;
+  border-radius: 10px;
+  padding: 24px 28px;
+  width: 420px;
+  max-width: 94vw;
+  box-shadow: 0 24px 64px rgba(0,0,0,.18);
+}
+#modal h3 { margin-bottom: 18px; font-size: 15px; }
+.modal-field { margin-bottom: 14px; }
+.modal-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+.modal-field input[type=text] {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+}
+.modal-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #dbeafe; }
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+/* ── WIKI CONTENT ── */
+.wiki { line-height: 1.75; color: var(--text); }
+.wiki h1 { font-size: 1.75em; font-weight: 700; border-bottom: 2px solid var(--border); padding-bottom: .3em; margin: .2em 0 .7em; }
+.wiki h2 { font-size: 1.35em; font-weight: 700; margin: 1.1em 0 .5em; }
+.wiki h3 { font-size: 1.1em; font-weight: 600; margin: 1em 0 .4em; }
+.wiki h4 { font-size: 1em; font-weight: 600; margin: .9em 0 .35em; }
+.wiki h5 { font-size: .9em; font-weight: 600; margin: .8em 0 .3em; }
+.wiki p { margin: .55em 0; }
+.wiki ul, .wiki ol { margin: .4em 0 .4em 1.7em; }
+.wiki li { margin: .2em 0; }
+.wiki li.checkbox { list-style: none; margin-left: -1.4em; }
+.wiki code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: .9em; }
+.wiki pre { background: var(--code-bg); padding: 14px 18px; border-radius: 7px; overflow-x: auto; margin: .8em 0; line-height: 1.5; }
+.wiki pre code { background: none; padding: 0; font-size: .875em; }
+.wiki blockquote { border-left: 3px solid var(--accent); padding-left: 14px; color: #555; margin: .8em 0; }
+.wiki table.wiki-table { border-collapse: collapse; margin: .8em 0; }
+.wiki th, .wiki td { border: 1px solid var(--border); padding: 6px 14px; text-align: left; }
+.wiki th { background: var(--sidebar-bg); font-weight: 600; }
+.wiki hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
+.wiki a { color: var(--accent); text-decoration: none; }
+.wiki a:hover { text-decoration: underline; }
+.wiki img { max-width: 100%; height: auto; border-radius: 4px; }
+.wiki strong { font-weight: 600; }
+.wiki input[type=checkbox] { cursor: default; }
+
+/* Search results */
+.search-hit { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+.search-hit:last-child { border-bottom: none; }
+.search-hit-title { font-size: 16px; font-weight: 600; color: var(--accent); cursor: pointer; }
+.search-hit-title:hover { text-decoration: underline; }
+.search-hit-path { font-size: 11px; color: var(--muted); margin: 2px 0 5px; }
+.search-hit-ctx { font-size: 13px; color: #555; line-height: 1.55; }
+.no-results { color: var(--muted); padding: 10px 0; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div id="sidebar-top">
+    <div id="notebook-name">Loading…</div>
+    <input id="search-box" type="text" placeholder="Search notes…" autocomplete="off">
+  </div>
+  <div id="tree"></div>
+  <div id="sidebar-actions">
+    <button class="btn small" onclick="showNewModal('page')">+ Page</button>
+    <button class="btn small" onclick="showNewModal('dir')">+ Folder</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="toolbar">
+    <div id="page-title">Select a page</div>
+    <div id="toolbar-btns">
+      <button class="btn" id="btn-edit" onclick="startEdit()" style="display:none">Edit</button>
+      <button class="btn primary" id="btn-save" onclick="doSave()" style="display:none">Save</button>
+      <button class="btn" id="btn-cancel" onclick="cancelEdit()" style="display:none">Cancel</button>
+      <button class="btn danger" id="btn-delete" onclick="doDelete()" style="display:none">Delete</button>
+    </div>
+  </div>
+  <div id="content-area">
+    <div id="view-pane">
+      <div id="view-inner"><p style="color:#aaa">Select a page from the sidebar.</p></div>
+    </div>
+    <div id="editor-pane">
+      <textarea id="editor" spellcheck="false"></textarea>
+    </div>
+    <div id="search-pane"></div>
+  </div>
+</div>
+
+<div id="modal-overlay" onclick="overlayClick(event)">
+  <div id="modal">
+    <h3 id="modal-title">New Page</h3>
+    <div class="modal-field">
+      <label id="modal-parent-label">Location</label>
+      <input id="modal-parent" type="text" placeholder="Leave empty for root">
+    </div>
+    <div class="modal-field">
+      <label id="modal-name-label">Page name</label>
+      <input id="modal-name" type="text" placeholder="My Page">
+    </div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="doCreate()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const S = {
+  currentPath: null,
+  isEditing: false,
+  rawContent: '',
+  treeData: [],
+  openDirs: new Set(),
+  notebookName: '',
+  modalMode: 'page',
+};
+
+// ── INIT ──────────────────────────────────────────────────────
+
+async function init() {
+  await loadTree();
+
+  const hash = location.hash.slice(1);
+  if (hash) {
+    loadPage(decodeURIComponent(hash));
+  } else {
+    loadPage('Home');
+  }
+
+  window.addEventListener('hashchange', () => {
+    const p = decodeURIComponent(location.hash.slice(1));
+    if (p && !S.isEditing) loadPage(p);
+  });
+
+  let searchTimer;
+  document.getElementById('search-box').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    const q = e.target.value.trim();
+    if (q.length < 2) { hideSearch(); return; }
+    searchTimer = setTimeout(() => doSearch(q), 280);
+  });
+
+  document.getElementById('search-box').addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.target.value = ''; hideSearch(); }
+  });
+
+  document.getElementById('editor').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); doSave(); }
+    if (e.key === 'Escape') cancelEdit();
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const el = e.target;
+      const s = el.selectionStart, en = el.selectionEnd;
+      el.value = el.value.slice(0, s) + '\t' + el.value.slice(en);
+      el.selectionStart = el.selectionEnd = s + 1;
+    }
+  });
+}
+
+// ── TREE ─────────────────────────────────────────────────────
+
+async function loadTree() {
+  const r = await fetch('/api/tree');
+  const d = await r.json();
+  S.notebookName = d.name || 'Notebook';
+  S.treeData = d.children || [];
+  document.getElementById('notebook-name').textContent = S.notebookName;
+  renderTree();
+}
+
+function renderTree() {
+  document.getElementById('tree').innerHTML = renderNodes(S.treeData, 0);
+}
+
+function renderNodes(nodes, depth) {
+  return (nodes || []).map(n => renderNode(n, depth)).join('');
+}
+
+function renderNode(n, depth) {
+  const pad = 6 + depth * 15;
+  const active = S.currentPath === n.path ? ' active' : '';
+
+  if (n.isDir) {
+    const open = S.openDirs.has(n.path);
+    const tid = `tc-${n.path.replace(/\//g, '__')}`;
+    return `<div class="tree-row${active}" style="padding-left:${pad}px"
+        data-path="${esc(n.path)}" data-dir="1" data-haspage="${n.hasPage ? 1 : 0}"
+        onclick="treeRowClick(event,this)">
+      <span class="tree-toggle">${open ? '▾' : '▸'}</span>
+      <span class="tree-icon">${open ? '📂' : '📁'}</span>
+      <span class="tree-label">${escHtml(n.name)}</span>
+    </div>
+    <div class="tree-children${open ? ' open' : ''}" id="${tid}">
+      ${renderNodes(n.children, depth + 1)}
+    </div>`;
+  } else {
+    return `<div class="tree-row${active}" style="padding-left:${pad + 17}px"
+        data-path="${esc(n.path)}"
+        onclick="treeRowClick(event,this)">
+      <span class="tree-icon">📄</span>
+      <span class="tree-label">${escHtml(n.name)}</span>
+    </div>`;
+  }
+}
+
+function treeRowClick(ev, el) {
+  const path = el.dataset.path;
+  const isDir = el.dataset.dir === '1';
+  const hasPage = el.dataset.haspage === '1';
+
+  if (isDir) {
+    toggleDir(path, el);
+    if (hasPage) loadPage(path);
+  } else {
+    loadPage(path);
+  }
+}
+
+function toggleDir(path, el) {
+  const tid = `tc-${path.replace(/\//g, '__')}`;
+  const child = document.getElementById(tid);
+  const toggle = el.querySelector('.tree-toggle');
+  const icon = el.querySelector('.tree-icon');
+
+  if (S.openDirs.has(path)) {
+    S.openDirs.delete(path);
+    if (child) child.classList.remove('open');
+    if (toggle) toggle.textContent = '▸';
+    if (icon) icon.textContent = '📁';
+  } else {
+    S.openDirs.add(path);
+    if (child) child.classList.add('open');
+    if (toggle) toggle.textContent = '▾';
+    if (icon) icon.textContent = '📂';
+  }
+}
+
+function setActiveTree(path) {
+  document.querySelectorAll('.tree-row.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll(`.tree-row[data-path="${CSS.escape(path)}"]`).forEach(el => el.classList.add('active'));
+}
+
+function autoExpand(path) {
+  const parts = path.split('/');
+  let cum = '';
+  for (let i = 0; i < parts.length - 1; i++) {
+    cum = cum ? `${cum}/${parts[i]}` : parts[i];
+    if (!S.openDirs.has(cum)) {
+      S.openDirs.add(cum);
+      const tid = `tc-${cum.replace(/\//g, '__')}`;
+      const child = document.getElementById(tid);
+      const row = document.querySelector(`.tree-row[data-path="${CSS.escape(cum)}"]`);
+      if (child) child.classList.add('open');
+      if (row) {
+        const t = row.querySelector('.tree-toggle');
+        const ic = row.querySelector('.tree-icon');
+        if (t) t.textContent = '▾';
+        if (ic) ic.textContent = '📂';
+      }
+    }
+  }
+}
+
+// ── PAGE LOAD / DISPLAY ──────────────────────────────────────
+
+async function loadPage(path) {
+  if (S.isEditing && !confirm('Discard unsaved changes?')) return;
+  S.isEditing = false;
+  hideSearch();
+
+  S.currentPath = path;
+  location.hash = encodeURIComponent(path);
+  autoExpand(path);
+  setActiveTree(path);
+
+  const r = await fetch(`/api/page?path=${encodeURIComponent(path)}`);
+  const d = await r.json();
+
+  S.rawContent = d.raw || '';
+
+  const titleEl = document.getElementById('page-title');
+  titleEl.textContent = d.title || path;
+  titleEl.className = 'loaded';
+
+  setView(d.html, d.exists);
+}
+
+function setView(htmlContent, exists) {
+  document.getElementById('view-inner').innerHTML = `<div class="wiki">${htmlContent}</div>`;
+
+  // Wire internal links
+  document.querySelectorAll('.internal-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('/page/')) {
+        loadPage(decodeURIComponent(href.slice(6)));
+      }
+    });
+  });
+
+  showPane('view');
+  document.getElementById('btn-edit').style.display = '';
+  document.getElementById('btn-delete').style.display = exists ? '' : 'none';
+  document.getElementById('btn-save').style.display = 'none';
+  document.getElementById('btn-cancel').style.display = 'none';
+}
+
+// ── EDIT / SAVE ───────────────────────────────────────────────
+
+function startEdit() {
+  S.isEditing = true;
+  let content = S.rawContent;
+  if (!content && S.currentPath) {
+    const parts = S.currentPath.split('/');
+    const title = parts[parts.length - 1].replace(/_/g, ' ');
+    const ts = new Date().toISOString().replace('Z', '+00:00').replace(/\.\d+/, '');
+    content = `Content-Type: text/x-zim-wiki\nWiki-Format: zim 0.6\nCreation-Date: ${ts}\n\n====== ${title} ======\n`;
+  }
+  document.getElementById('editor').value = content;
+  showPane('editor');
+  document.getElementById('editor').focus();
+  document.getElementById('btn-edit').style.display = 'none';
+  document.getElementById('btn-delete').style.display = 'none';
+  document.getElementById('btn-save').style.display = '';
+  document.getElementById('btn-cancel').style.display = '';
+}
+
+async function doSave() {
+  if (!S.currentPath) return;
+  const content = document.getElementById('editor').value;
+  const r = await fetch(`/api/save?path=${encodeURIComponent(S.currentPath)}`, {
+    method: 'POST',
+    body: content,
+  });
+  const d = await r.json();
+  if (d.error) { alert('Save failed: ' + d.error); return; }
+
+  S.rawContent = content;
+  S.isEditing = false;
+  document.getElementById('page-title').textContent = d.title || S.currentPath;
+  setView(d.html, true);
+  await loadTree();
+}
+
+function cancelEdit() {
+  S.isEditing = false;
+  if (S.rawContent) {
+    setView(document.getElementById('view-inner').querySelector('.wiki')?.innerHTML || '', true);
+    showPane('view');
+  } else {
+    showPane('view');
+  }
+  document.getElementById('btn-edit').style.display = '';
+  document.getElementById('btn-delete').style.display = S.rawContent ? '' : 'none';
+  document.getElementById('btn-save').style.display = 'none';
+  document.getElementById('btn-cancel').style.display = 'none';
+}
+
+// ── DELETE ────────────────────────────────────────────────────
+
+async function doDelete() {
+  if (!S.currentPath) return;
+  const node = findNode(S.treeData, S.currentPath);
+  const isDir = node && node.isDir;
+  const warn = isDir
+    ? `Delete folder "${S.currentPath}" and all its contents? This cannot be undone.`
+    : `Delete page "${S.currentPath}"? This cannot be undone.`;
+  if (!confirm(warn)) return;
+
+  await fetch('/api/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: S.currentPath, isDir: !!isDir }),
+  });
+
+  S.currentPath = null;
+  S.rawContent = '';
+  location.hash = '';
+  document.getElementById('page-title').textContent = 'Select a page';
+  document.getElementById('page-title').className = '';
+  document.getElementById('view-inner').innerHTML = '<p style="color:#aaa">Page deleted.</p>';
+  document.getElementById('btn-edit').style.display = 'none';
+  document.getElementById('btn-delete').style.display = 'none';
+  await loadTree();
+}
+
+// ── SEARCH ────────────────────────────────────────────────────
+
+async function doSearch(q) {
+  showPane('search');
+  const sp = document.getElementById('search-pane');
+  sp.innerHTML = '<p style="color:#aaa">Searching…</p>';
+
+  const r = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+  const results = await r.json();
+
+  if (!results.length) {
+    sp.innerHTML = `<p class="no-results">No results for <strong>${escHtml(q)}</strong></p>`;
+    return;
+  }
+  sp.innerHTML = `<p style="color:var(--muted);margin-bottom:18px;font-size:13px">${results.length} result${results.length !== 1 ? 's' : ''} for <strong>${escHtml(q)}</strong></p>` +
+    results.map(r => `
+      <div class="search-hit">
+        <div class="search-hit-title" onclick="pickResult('${esc(r.path)}')">${escHtml(r.title)}</div>
+        <div class="search-hit-path">${escHtml(r.path)}</div>
+        ${r.context ? `<div class="search-hit-ctx">${escHtml(r.context)}</div>` : ''}
+      </div>`).join('');
+}
+
+function pickResult(path) {
+  document.getElementById('search-box').value = '';
+  hideSearch();
+  loadPage(path);
+}
+
+function hideSearch() {
+  if (!S.isEditing) showPane('view');
+}
+
+// ── CREATE MODAL ─────────────────────────────────────────────
+
+function showNewModal(mode) {
+  S.modalMode = mode;
+  document.getElementById('modal-title').textContent = mode === 'page' ? 'New Page' : 'New Folder';
+  document.getElementById('modal-name-label').textContent = mode === 'page' ? 'Page name' : 'Folder name';
+  document.getElementById('modal-name').placeholder = mode === 'page' ? 'My Page' : 'My Folder';
+
+  // Suggest parent path from current page
+  let parent = '';
+  if (S.currentPath) {
+    const node = findNode(S.treeData, S.currentPath);
+    if (node && node.isDir) {
+      parent = S.currentPath;
+    } else {
+      const parts = S.currentPath.split('/');
+      if (parts.length > 1) {
+        parts.pop();
+        parent = parts.join('/');
+      }
+    }
+  }
+  document.getElementById('modal-parent').value = parent;
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('modal-name').focus(), 60);
+
+  document.getElementById('modal-name').onkeydown = e => {
+    if (e.key === 'Enter') doCreate();
+    if (e.key === 'Escape') closeModal();
+  };
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+async function doCreate() {
+  const name = document.getElementById('modal-name').value.trim();
+  if (!name) { document.getElementById('modal-name').focus(); return; }
+
+  const parent = document.getElementById('modal-parent').value.trim();
+  const fullPath = parent ? `${parent}/${name}` : name;
+
+  const r = await fetch('/api/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: fullPath, isDir: S.modalMode === 'dir' }),
+  });
+  const d = await r.json();
+  if (d.error) { alert('Error: ' + d.error); return; }
+
+  closeModal();
+  await loadTree();
+
+  if (S.modalMode === 'page') {
+    loadPage(fullPath);
+  } else {
+    // Expand parent if needed
+    if (parent) {
+      S.openDirs.add(parent);
+      renderTree();
+    }
+  }
+}
+
+// ── PANE SWITCHING ────────────────────────────────────────────
+
+function showPane(which) {
+  document.getElementById('view-pane').style.display   = which === 'view'   ? '' : 'none';
+  document.getElementById('editor-pane').style.display  = which === 'editor' ? 'flex' : 'none';
+  document.getElementById('search-pane').style.display  = which === 'search' ? '' : 'none';
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function esc(s) {
+  return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function findNode(nodes, path) {
+  if (!nodes) return null;
+  for (const n of nodes) {
+    if (n.path === path) return n;
+    const found = findNode(n.children, path);
+    if (found) return found;
+  }
+  return null;
+}
+
+// ── START ─────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

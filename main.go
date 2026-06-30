@@ -545,6 +545,52 @@ func buildTree(dirPath, relPath string) []TreeNode {
 	return nodes
 }
 
+func findBacklinks(notebookPath, pagePath string) []SearchResult {
+	parts := strings.Split(pagePath, "/")
+	pageName := parts[len(parts)-1]
+
+	seen := make(map[string]bool)
+	var results []SearchResult
+	filepath.Walk(notebookPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".txt") {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+		content := string(data)
+		for _, m := range reLink.FindAllStringSubmatch(content, -1) {
+			inner := m[1]
+			target := inner
+			if i := strings.Index(inner, "|"); i >= 0 {
+				target = strings.TrimSpace(inner[:i])
+			}
+			target = strings.TrimSpace(target)
+			if strings.Contains(target, "://") {
+				continue
+			}
+			targetPath := strings.ReplaceAll(target, ":", "/")
+			if targetPath == pagePath || target == pageName {
+				rel, _ := filepath.Rel(notebookPath, path)
+				rel = filepath.ToSlash(strings.TrimSuffix(rel, ".txt"))
+				if rel != pagePath && !seen[rel] {
+					seen[rel] = true
+					title := getPageTitle(content)
+					if title == "" {
+						p := strings.Split(rel, "/")
+						title = displayName(p[len(p)-1])
+					}
+					results = append(results, SearchResult{Path: rel, Title: title})
+				}
+				break
+			}
+		}
+		return nil
+	})
+	return results
+}
+
 func searchPages(notebookPath, query string) []SearchResult {
 	query = strings.ToLower(strings.TrimSpace(query))
 	if query == "" {
@@ -761,6 +807,98 @@ func (s *srv) api(w http.ResponseWriter, r *http.Request) {
 			results = []SearchResult{}
 		}
 		jsonOK(w, results)
+
+	case "backlinks":
+		pagePath := r.URL.Query().Get("path")
+		if pagePath == "" {
+			jsonErr(w, "missing path"); return
+		}
+		results := findBacklinks(s.notebookPath, pagePath)
+		if results == nil {
+			results = []SearchResult{}
+		}
+		jsonOK(w, results)
+
+	case "rename":
+		if r.Method != "POST" {
+			http.Error(w, "POST required", http.StatusMethodNotAllowed); return
+		}
+		var req struct {
+			OldPath string `json:"oldPath"`
+			NewPath string `json:"newPath"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		if req.OldPath == "" || req.NewPath == "" {
+			jsonErr(w, "missing path"); return
+		}
+		oldFile := getPageFilePath(s.notebookPath, req.OldPath)
+		newFile := getPageFilePath(s.notebookPath, req.NewPath)
+		// Guard against path traversal
+		absNew, _ := filepath.Abs(newFile)
+		if !strings.HasPrefix(absNew, s.notebookPath+string(os.PathSeparator)) {
+			jsonErr(w, "invalid path"); return
+		}
+		if _, err := os.Stat(newFile); err == nil {
+			jsonErr(w, "destination already exists"); return
+		}
+		if err := os.MkdirAll(filepath.Dir(newFile), 0755); err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		if err := os.Rename(oldFile, newFile); err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		// Also rename the associated attachment/sub-page directory if present
+		oldDir := strings.TrimSuffix(oldFile, ".txt")
+		newDir := strings.TrimSuffix(newFile, ".txt")
+		if info, err := os.Stat(oldDir); err == nil && info.IsDir() {
+			os.MkdirAll(filepath.Dir(newDir), 0755)
+			os.Rename(oldDir, newDir)
+		}
+		jsonOK(w, map[string]interface{}{"ok": true, "newPath": req.NewPath})
+
+	case "upload":
+		if r.Method != "POST" {
+			http.Error(w, "POST required", http.StatusMethodNotAllowed); return
+		}
+		pageDir := r.URL.Query().Get("dir")
+		if err := r.ParseMultipartForm(32 << 20); err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		file, header, err := r.FormFile("file")
+		if err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		defer file.Close()
+		safeBase := filepath.Base(header.Filename)
+		var targetDir string
+		if pageDir != "" {
+			targetDir = filepath.Join(s.notebookPath, filepath.FromSlash(pageDir))
+		} else {
+			targetDir = s.notebookPath
+		}
+		// Guard against path traversal
+		absTarget, _ := filepath.Abs(targetDir)
+		if !strings.HasPrefix(absTarget, s.notebookPath) {
+			jsonErr(w, "invalid path"); return
+		}
+		if err := os.MkdirAll(targetDir, 0755); err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		dst, err := os.Create(filepath.Join(targetDir, safeBase))
+		if err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		defer dst.Close()
+		if _, err := io.Copy(dst, file); err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		attachPath := safeBase
+		if pageDir != "" {
+			attachPath = pageDir + "/" + safeBase
+		}
+		jsonOK(w, map[string]string{"url": "/attachment/" + attachPath, "name": safeBase})
 
 	default:
 		http.NotFound(w, r)

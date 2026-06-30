@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+(function(){var t=localStorage.getItem('zimalt-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zim Wiki</title>
+<link id="hl-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<link id="hl-dark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" disabled>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 <style>
 :root {
   --sidebar-w: 260px;
@@ -20,6 +26,39 @@
   --hover: rgba(0,0,0,0.05);
   --active-bg: #dbeafe;
   --active-text: #1d4ed8;
+  --mark-bg: #fef08a;
+}
+[data-theme="dark"] {
+  --bg: #1e1e1e;
+  --sidebar-bg: #252525;
+  --border: #3a3a3a;
+  --text: #e0e0e0;
+  --muted: #888;
+  --accent: #60a5fa;
+  --accent-dark: #3b82f6;
+  --danger: #f87171;
+  --code-bg: #2a2a2a;
+  --hover: rgba(255,255,255,0.06);
+  --active-bg: #1e3a5f;
+  --active-text: #93c5fd;
+  --mark-bg: #78350f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1e1e1e;
+    --sidebar-bg: #252525;
+    --border: #3a3a3a;
+    --text: #e0e0e0;
+    --muted: #888;
+    --accent: #60a5fa;
+    --accent-dark: #3b82f6;
+    --danger: #f87171;
+    --code-bg: #2a2a2a;
+    --hover: rgba(255,255,255,0.06);
+    --active-bg: #1e3a5f;
+    --active-text: #93c5fd;
+    --mark-bg: #78350f;
+  }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -64,10 +103,10 @@ body {
   border-radius: 5px;
   font-size: 13px;
   outline: none;
-  background: white;
+  background: var(--bg);
+  color: var(--text);
 }
-#search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #dbeafe; }
-
+#search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,.25); }
 #tree {
   flex: 1;
   overflow-y: auto;
@@ -87,42 +126,16 @@ body {
 }
 .tree-row:hover { background: var(--hover); }
 .tree-row.active { background: var(--active-bg); color: var(--active-text); }
-.tree-toggle {
-  width: 14px;
-  font-size: 9px;
-  color: var(--muted);
-  text-align: center;
-  flex-shrink: 0;
-  line-height: 1;
-}
+.tree-toggle { width: 14px; font-size: 9px; color: var(--muted); text-align: center; flex-shrink: 0; line-height: 1; }
 .tree-row.active .tree-toggle { color: var(--active-text); }
 .tree-icon { font-size: 13px; flex-shrink: 0; }
-.tree-label {
-  flex: 1;
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: 1.4;
-}
+.tree-label { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
 .tree-children { display: none; }
 .tree-children.open { display: block; }
-
-#sidebar-actions {
-  border-top: 1px solid var(--border);
-  padding: 8px;
-  display: flex;
-  gap: 6px;
-}
+#sidebar-actions { border-top: 1px solid var(--border); padding: 8px; display: flex; gap: 6px; }
 
 /* ── MAIN ── */
-#main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
-}
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 #toolbar {
   height: var(--header-h);
   border-bottom: 1px solid var(--border);
@@ -143,27 +156,13 @@ body {
   color: var(--muted);
 }
 #page-title.loaded { color: var(--text); }
-#toolbar-btns { display: flex; gap: 6px; flex-shrink: 0; }
+#toolbar-btns { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
 
-#content-area {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-#view-pane {
-  flex: 1;
-  overflow-y: auto;
-  padding: 36px 56px;
-}
-#view-inner { max-width: 780px; }
-#editor-pane {
-  flex: 1;
-  display: none;
-  flex-direction: column;
-  min-height: 0;
-}
+/* ── CONTENT PANES ── */
+#content-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+#view-pane { flex: 1; overflow-y: auto; padding: 28px 56px 56px; }
+#view-wrapper { max-width: 780px; }
+#editor-pane { flex: 1; display: none; flex-direction: column; min-height: 0; }
 #editor {
   flex: 1;
   border: none;
@@ -173,14 +172,82 @@ body {
   font-size: 13px;
   line-height: 1.75;
   resize: none;
-  background: white;
+  background: var(--bg);
+  color: var(--text);
 }
-#search-pane {
+#search-pane { display: none; flex: 1; overflow-y: auto; padding: 24px 56px; }
+
+/* ── BREADCRUMB ── */
+#breadcrumb {
   display: none;
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px 56px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
 }
+#breadcrumb.visible { display: flex; }
+.bc-sep { color: var(--border); font-size: 14px; }
+.bc-link { color: var(--accent); cursor: pointer; }
+.bc-link:hover { text-decoration: underline; }
+
+/* ── TOC ── */
+#toc-panel {
+  display: none;
+  position: fixed;
+  top: calc(var(--header-h) + 20px);
+  right: 20px;
+  width: 195px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  max-height: calc(100vh - var(--header-h) - 40px);
+  overflow-y: auto;
+  z-index: 10;
+  font-size: 12px;
+}
+@media (min-width: 1200px) { #toc-panel.visible { display: block; } }
+#toc-heading { font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+.toc-item { line-height: 1.4; margin: 3px 0; }
+.toc-item a { color: var(--text); text-decoration: none; display: block; }
+.toc-item a:hover { color: var(--accent); }
+.toc-h2 { padding-left: 0; font-weight: 500; }
+.toc-h3 { padding-left: 10px; color: var(--muted); }
+.toc-h4 { padding-left: 20px; color: var(--muted); }
+
+/* ── BACKLINKS ── */
+#backlinks-section { display: none; margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--border); }
+#backlinks-section.visible { display: block; }
+.backlinks-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 10px; }
+.backlink-item { margin: 5px 0; }
+.backlink-item a { color: var(--accent); cursor: pointer; font-size: 13px; text-decoration: none; }
+.backlink-item a:hover { text-decoration: underline; }
+
+/* ── UPLOAD DROP ZONE ── */
+#drop-zone {
+  display: none;
+  margin-top: 24px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 20px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  transition: border-color .15s, background .15s;
+}
+#drop-zone.visible { display: block; }
+#drop-zone.drag-over { border-color: var(--accent); background: var(--active-bg); }
+#drop-zone input[type=file] { display: none; }
+.dz-hint { margin-bottom: 6px; }
+.dz-browse { color: var(--accent); cursor: pointer; }
+.dz-browse:hover { text-decoration: underline; }
+#upload-list { margin-top: 12px; text-align: left; }
+.upload-item { padding: 4px 0; font-size: 12px; border-bottom: 1px solid var(--border); }
+.upload-item:last-child { border-bottom: none; }
+.upload-item a { color: var(--accent); }
+.upload-zim { font-family: monospace; font-size: 11px; color: var(--muted); margin-left: 6px; }
 
 /* ── BUTTONS ── */
 .btn {
@@ -189,7 +256,7 @@ body {
   border-radius: 5px;
   cursor: pointer;
   font-size: 13px;
-  background: white;
+  background: var(--bg);
   color: var(--text);
   white-space: nowrap;
   line-height: 1.4;
@@ -199,9 +266,11 @@ body {
 .btn.primary:hover { background: var(--accent-dark); }
 .btn.danger { background: var(--danger); color: white; border-color: var(--danger); }
 .btn.small { padding: 4px 10px; font-size: 12px; flex: 1; }
+.btn.icon { padding: 4px 7px; font-size: 16px; line-height: 1; border-color: transparent; background: transparent; }
+.btn.icon:hover { background: var(--hover); border-color: var(--border); }
 
-/* ── MODAL ── */
-#modal-overlay {
+/* ── MODALS ── */
+.modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
@@ -210,16 +279,17 @@ body {
   align-items: center;
   justify-content: center;
 }
-#modal-overlay.open { display: flex; }
-#modal {
-  background: white;
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--bg);
   border-radius: 10px;
   padding: 24px 28px;
   width: 420px;
   max-width: 94vw;
-  box-shadow: 0 24px 64px rgba(0,0,0,.18);
+  box-shadow: 0 24px 64px rgba(0,0,0,.25);
+  border: 1px solid var(--border);
 }
-#modal h3 { margin-bottom: 18px; font-size: 15px; }
+.modal-box h3 { margin-bottom: 18px; font-size: 15px; color: var(--text); }
 .modal-field { margin-bottom: 14px; }
 .modal-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
 .modal-field input[type=text] {
@@ -229,8 +299,10 @@ body {
   border-radius: 5px;
   font-size: 14px;
   outline: none;
+  background: var(--bg);
+  color: var(--text);
 }
-.modal-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #dbeafe; }
+.modal-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,.25); }
 .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
 
 /* ── WIKI CONTENT ── */
@@ -244,10 +316,10 @@ body {
 .wiki ul, .wiki ol { margin: .4em 0 .4em 1.7em; }
 .wiki li { margin: .2em 0; }
 .wiki li.checkbox { list-style: none; margin-left: -1.4em; }
-.wiki code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: .9em; }
+.wiki code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: .9em; color: var(--text); }
 .wiki pre { background: var(--code-bg); padding: 14px 18px; border-radius: 7px; overflow-x: auto; margin: .8em 0; line-height: 1.5; }
 .wiki pre code { background: none; padding: 0; font-size: .875em; }
-.wiki blockquote { border-left: 3px solid var(--accent); padding-left: 14px; color: #555; margin: .8em 0; }
+.wiki blockquote { border-left: 3px solid var(--accent); padding-left: 14px; color: var(--muted); margin: .8em 0; }
 .wiki table.wiki-table { border-collapse: collapse; margin: .8em 0; }
 .wiki th, .wiki td { border: 1px solid var(--border); padding: 6px 14px; text-align: left; }
 .wiki th { background: var(--sidebar-bg); font-weight: 600; }
@@ -258,14 +330,15 @@ body {
 .wiki strong { font-weight: 600; }
 .wiki input[type=checkbox] { cursor: default; }
 
-/* Search results */
+/* ── SEARCH RESULTS ── */
 .search-hit { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
 .search-hit:last-child { border-bottom: none; }
 .search-hit-title { font-size: 16px; font-weight: 600; color: var(--accent); cursor: pointer; }
 .search-hit-title:hover { text-decoration: underline; }
 .search-hit-path { font-size: 11px; color: var(--muted); margin: 2px 0 5px; }
-.search-hit-ctx { font-size: 13px; color: #555; line-height: 1.55; }
+.search-hit-ctx { font-size: 13px; color: var(--muted); line-height: 1.55; }
 .no-results { color: var(--muted); padding: 10px 0; }
+mark { background: var(--mark-bg); color: var(--text); border-radius: 2px; padding: 0 1px; }
 </style>
 </head>
 <body>
@@ -286,6 +359,9 @@ body {
   <div id="toolbar">
     <div id="page-title">Select a page</div>
     <div id="toolbar-btns">
+      <button class="btn icon" id="btn-theme" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+      <button class="btn" id="btn-attach" onclick="toggleUpload()" style="display:none">Attach</button>
+      <button class="btn" id="btn-rename" onclick="showRenameModal()" style="display:none">Rename</button>
       <button class="btn" id="btn-edit" onclick="startEdit()" style="display:none">Edit</button>
       <button class="btn primary" id="btn-save" onclick="doSave()" style="display:none">Save</button>
       <button class="btn" id="btn-cancel" onclick="cancelEdit()" style="display:none">Cancel</button>
@@ -294,7 +370,16 @@ body {
   </div>
   <div id="content-area">
     <div id="view-pane">
-      <div id="view-inner"><p style="color:#aaa">Select a page from the sidebar.</p></div>
+      <div id="view-wrapper">
+        <nav id="breadcrumb"></nav>
+        <div id="view-inner"><p style="color:#aaa">Select a page from the sidebar.</p></div>
+        <section id="backlinks-section"></section>
+        <div id="drop-zone">
+          <input type="file" id="file-input" multiple>
+          <div class="dz-hint">Drop files here to attach, or <span class="dz-browse" onclick="document.getElementById('file-input').click()">browse</span></div>
+          <div id="upload-list"></div>
+        </div>
+      </div>
     </div>
     <div id="editor-pane">
       <textarea id="editor" spellcheck="false"></textarea>
@@ -303,8 +388,15 @@ body {
   </div>
 </div>
 
-<div id="modal-overlay" onclick="overlayClick(event)">
-  <div id="modal">
+<!-- Floating TOC (shown only on wide screens) -->
+<div id="toc-panel">
+  <div id="toc-heading">Contents</div>
+  <div id="toc-list"></div>
+</div>
+
+<!-- Create modal -->
+<div id="modal-overlay" class="modal-overlay" onclick="overlayClick(event)">
+  <div class="modal-box">
     <h3 id="modal-title">New Page</h3>
     <div class="modal-field">
       <label id="modal-parent-label">Location</label>
@@ -317,6 +409,21 @@ body {
     <div class="modal-btns">
       <button class="btn" onclick="closeModal()">Cancel</button>
       <button class="btn primary" onclick="doCreate()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename modal -->
+<div id="rename-overlay" class="modal-overlay" onclick="renameOverlayClick(event)">
+  <div class="modal-box">
+    <h3>Rename / Move Page</h3>
+    <div class="modal-field">
+      <label>New path (use / for sub-pages, e.g. Notes/Ruby)</label>
+      <input id="rename-input" type="text">
+    </div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeRenameModal()">Cancel</button>
+      <button class="btn primary" onclick="doRename()">Rename</button>
     </div>
   </div>
 </div>
@@ -334,17 +441,38 @@ const S = {
   modalMode: 'page',
 };
 
+// ── THEME ─────────────────────────────────────────────────────
+
+function isDark() {
+  const t = document.documentElement.getAttribute('data-theme');
+  if (t === 'dark') return true;
+  if (t === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function applyThemeUI() {
+  document.getElementById('btn-theme').textContent = isDark() ? '☀️' : '🌙';
+  document.getElementById('hl-light').disabled = isDark();
+  document.getElementById('hl-dark').disabled  = !isDark();
+}
+
+function toggleTheme() {
+  const next = isDark() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('zimalt-theme', next);
+  applyThemeUI();
+}
+
 // ── INIT ──────────────────────────────────────────────────────
 
 async function init() {
+  applyThemeUI();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyThemeUI);
+
   await loadTree();
 
   const hash = location.hash.slice(1);
-  if (hash) {
-    loadPage(decodeURIComponent(hash));
-  } else {
-    loadPage('Home');
-  }
+  loadPage(hash ? decodeURIComponent(hash) : 'Home');
 
   window.addEventListener('hashchange', () => {
     const p = decodeURIComponent(location.hash.slice(1));
@@ -368,12 +496,13 @@ async function init() {
     if (e.key === 'Escape') cancelEdit();
     if (e.key === 'Tab') {
       e.preventDefault();
-      const el = e.target;
-      const s = el.selectionStart, en = el.selectionEnd;
+      const el = e.target, s = el.selectionStart, en = el.selectionEnd;
       el.value = el.value.slice(0, s) + '\t' + el.value.slice(en);
       el.selectionStart = el.selectionEnd = s + 1;
     }
   });
+
+  setupDropZone();
 }
 
 // ── TREE ─────────────────────────────────────────────────────
@@ -398,7 +527,6 @@ function renderNodes(nodes, depth) {
 function renderNode(n, depth) {
   const pad = 6 + depth * 15;
   const active = S.currentPath === n.path ? ' active' : '';
-
   if (n.isDir) {
     const open = S.openDirs.has(n.path);
     const tid = `tc-${n.path.replace(/\//g, '__')}`;
@@ -426,31 +554,25 @@ function treeRowClick(ev, el) {
   const path = el.dataset.path;
   const isDir = el.dataset.dir === '1';
   const hasPage = el.dataset.haspage === '1';
-
-  if (isDir) {
-    toggleDir(path, el);
-    if (hasPage) loadPage(path);
-  } else {
-    loadPage(path);
-  }
+  if (isDir) { toggleDir(path, el); if (hasPage) loadPage(path); }
+  else { loadPage(path); }
 }
 
 function toggleDir(path, el) {
   const tid = `tc-${path.replace(/\//g, '__')}`;
   const child = document.getElementById(tid);
   const toggle = el.querySelector('.tree-toggle');
-  const icon = el.querySelector('.tree-icon');
-
+  const icon   = el.querySelector('.tree-icon');
   if (S.openDirs.has(path)) {
     S.openDirs.delete(path);
     if (child) child.classList.remove('open');
     if (toggle) toggle.textContent = '▸';
-    if (icon) icon.textContent = '📁';
+    if (icon)   icon.textContent   = '📁';
   } else {
     S.openDirs.add(path);
     if (child) child.classList.add('open');
     if (toggle) toggle.textContent = '▾';
-    if (icon) icon.textContent = '📂';
+    if (icon)   icon.textContent   = '📂';
   }
 }
 
@@ -468,12 +590,12 @@ function autoExpand(path) {
       S.openDirs.add(cum);
       const tid = `tc-${cum.replace(/\//g, '__')}`;
       const child = document.getElementById(tid);
-      const row = document.querySelector(`.tree-row[data-path="${CSS.escape(cum)}"]`);
+      const row   = document.querySelector(`.tree-row[data-path="${CSS.escape(cum)}"]`);
       if (child) child.classList.add('open');
       if (row) {
         const t = row.querySelector('.tree-toggle');
         const ic = row.querySelector('.tree-icon');
-        if (t) t.textContent = '▾';
+        if (t)  t.textContent  = '▾';
         if (ic) ic.textContent = '📂';
       }
     }
@@ -494,7 +616,6 @@ async function loadPage(path) {
 
   const r = await fetch(`/api/page?path=${encodeURIComponent(path)}`);
   const d = await r.json();
-
   S.rawContent = d.raw || '';
 
   const titleEl = document.getElementById('page-title');
@@ -502,27 +623,97 @@ async function loadPage(path) {
   titleEl.className = 'loaded';
 
   setView(d.html, d.exists);
+  renderBreadcrumb(path);
+  loadTOC();
+  loadBacklinks(path);
 }
 
 function setView(htmlContent, exists) {
   document.getElementById('view-inner').innerHTML = `<div class="wiki">${htmlContent}</div>`;
 
-  // Wire internal links
   document.querySelectorAll('.internal-link').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
       const href = a.getAttribute('href') || '';
-      if (href.startsWith('/page/')) {
-        loadPage(decodeURIComponent(href.slice(6)));
-      }
+      if (href.startsWith('/page/')) loadPage(decodeURIComponent(href.slice(6)));
     });
   });
 
+  if (window.hljs) {
+    document.querySelectorAll('#view-inner pre code').forEach(el => hljs.highlightElement(el));
+  }
+
+  // Hide upload list when switching pages
+  document.getElementById('drop-zone').classList.remove('visible');
+  document.getElementById('upload-list').innerHTML = '';
+
   showPane('view');
-  document.getElementById('btn-edit').style.display = '';
+  document.getElementById('btn-edit').style.display   = '';
+  document.getElementById('btn-attach').style.display = '';
+  document.getElementById('btn-rename').style.display = '';
   document.getElementById('btn-delete').style.display = exists ? '' : 'none';
-  document.getElementById('btn-save').style.display = 'none';
+  document.getElementById('btn-save').style.display   = 'none';
   document.getElementById('btn-cancel').style.display = 'none';
+}
+
+// ── BREADCRUMBS ───────────────────────────────────────────────
+
+function renderBreadcrumb(path) {
+  const bc = document.getElementById('breadcrumb');
+  if (!path || !path.includes('/')) { bc.classList.remove('visible'); return; }
+  const parts = path.split('/');
+  let html = '', cum = '';
+  for (let i = 0; i < parts.length - 1; i++) {
+    cum = cum ? `${cum}/${parts[i]}` : parts[i];
+    const cp = cum;
+    html += `<span class="bc-link" onclick="loadPage('${esc(cp)}')">${escHtml(parts[i].replace(/_/g,' '))}</span>`;
+    html += `<span class="bc-sep">›</span>`;
+  }
+  bc.innerHTML = html;
+  bc.classList.add('visible');
+}
+
+// ── TABLE OF CONTENTS ─────────────────────────────────────────
+
+function loadTOC() {
+  const panel = document.getElementById('toc-panel');
+  const list  = document.getElementById('toc-list');
+  const headings = [...document.querySelectorAll('#view-inner h1,#view-inner h2,#view-inner h3,#view-inner h4')];
+
+  if (headings.length < 3) { panel.classList.remove('visible'); return; }
+
+  list.innerHTML = headings.map(h => {
+    const lvl = h.tagName[1];
+    const id  = h.id || '';
+    return `<div class="toc-item toc-h${lvl}">
+      <a href="#${esc(id)}" onclick="scrollTo(event,'${esc(id)}')">${escHtml(h.textContent)}</a>
+    </div>`;
+  }).join('');
+  panel.classList.add('visible');
+}
+
+function scrollTo(e, id) {
+  e.preventDefault();
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── BACKLINKS ─────────────────────────────────────────────────
+
+async function loadBacklinks(path) {
+  const section = document.getElementById('backlinks-section');
+  section.classList.remove('visible');
+  try {
+    const r = await fetch(`/api/backlinks?path=${encodeURIComponent(path)}`);
+    const results = await r.json();
+    if (!results.length) return;
+    section.innerHTML =
+      `<div class="backlinks-label">Linked from (${results.length})</div>` +
+      results.map(bl =>
+        `<div class="backlink-item"><a onclick="loadPage('${esc(bl.path)}')">${escHtml(bl.title)}</a></div>`
+      ).join('');
+    section.classList.add('visible');
+  } catch (_) {}
 }
 
 // ── EDIT / SAVE ───────────────────────────────────────────────
@@ -539,9 +730,11 @@ function startEdit() {
   document.getElementById('editor').value = content;
   showPane('editor');
   document.getElementById('editor').focus();
-  document.getElementById('btn-edit').style.display = 'none';
+  document.getElementById('btn-edit').style.display   = 'none';
+  document.getElementById('btn-attach').style.display = 'none';
+  document.getElementById('btn-rename').style.display = 'none';
   document.getElementById('btn-delete').style.display = 'none';
-  document.getElementById('btn-save').style.display = '';
+  document.getElementById('btn-save').style.display   = '';
   document.getElementById('btn-cancel').style.display = '';
 }
 
@@ -549,40 +742,32 @@ async function doSave() {
   if (!S.currentPath) return;
   const content = document.getElementById('editor').value;
   const r = await fetch(`/api/save?path=${encodeURIComponent(S.currentPath)}`, {
-    method: 'POST',
-    body: content,
+    method: 'POST', body: content,
   });
   const d = await r.json();
   if (d.error) { alert('Save failed: ' + d.error); return; }
-
   S.rawContent = content;
-  S.isEditing = false;
+  S.isEditing  = false;
   document.getElementById('page-title').textContent = d.title || S.currentPath;
   setView(d.html, true);
+  loadTOC();
+  loadBacklinks(S.currentPath);
   await loadTree();
 }
 
 function cancelEdit() {
   S.isEditing = false;
-  if (S.rawContent) {
-    setView(document.getElementById('view-inner').querySelector('.wiki')?.innerHTML || '', true);
-    showPane('view');
-  } else {
-    showPane('view');
-  }
-  document.getElementById('btn-edit').style.display = '';
-  document.getElementById('btn-delete').style.display = S.rawContent ? '' : 'none';
-  document.getElementById('btn-save').style.display = 'none';
-  document.getElementById('btn-cancel').style.display = 'none';
+  setView(document.getElementById('view-inner').querySelector('.wiki')?.innerHTML || '', !!S.rawContent);
+  loadTOC();
 }
 
 // ── DELETE ────────────────────────────────────────────────────
 
 async function doDelete() {
   if (!S.currentPath) return;
-  const node = findNode(S.treeData, S.currentPath);
+  const node  = findNode(S.treeData, S.currentPath);
   const isDir = node && node.isDir;
-  const warn = isDir
+  const warn  = isDir
     ? `Delete folder "${S.currentPath}" and all its contents? This cannot be undone.`
     : `Delete page "${S.currentPath}"? This cannot be undone.`;
   if (!confirm(warn)) return;
@@ -594,13 +779,18 @@ async function doDelete() {
   });
 
   S.currentPath = null;
-  S.rawContent = '';
+  S.rawContent  = '';
   location.hash = '';
   document.getElementById('page-title').textContent = 'Select a page';
-  document.getElementById('page-title').className = '';
-  document.getElementById('view-inner').innerHTML = '<p style="color:#aaa">Page deleted.</p>';
-  document.getElementById('btn-edit').style.display = 'none';
+  document.getElementById('page-title').className   = '';
+  document.getElementById('view-inner').innerHTML   = '<p style="color:#aaa">Page deleted.</p>';
+  document.getElementById('btn-edit').style.display   = 'none';
+  document.getElementById('btn-attach').style.display = 'none';
+  document.getElementById('btn-rename').style.display = 'none';
   document.getElementById('btn-delete').style.display = 'none';
+  document.getElementById('toc-panel').classList.remove('visible');
+  document.getElementById('backlinks-section').classList.remove('visible');
+  document.getElementById('breadcrumb').classList.remove('visible');
   await loadTree();
 }
 
@@ -618,13 +808,30 @@ async function doSearch(q) {
     sp.innerHTML = `<p class="no-results">No results for <strong>${escHtml(q)}</strong></p>`;
     return;
   }
-  sp.innerHTML = `<p style="color:var(--muted);margin-bottom:18px;font-size:13px">${results.length} result${results.length !== 1 ? 's' : ''} for <strong>${escHtml(q)}</strong></p>` +
-    results.map(r => `
+  sp.innerHTML =
+    `<p style="color:var(--muted);margin-bottom:18px;font-size:13px">${results.length} result${results.length !== 1 ? 's' : ''} for <strong>${escHtml(q)}</strong></p>` +
+    results.map(res => `
       <div class="search-hit">
-        <div class="search-hit-title" onclick="pickResult('${esc(r.path)}')">${escHtml(r.title)}</div>
-        <div class="search-hit-path">${escHtml(r.path)}</div>
-        ${r.context ? `<div class="search-hit-ctx">${escHtml(r.context)}</div>` : ''}
+        <div class="search-hit-title" onclick="pickResult('${esc(res.path)}')">${escHtml(res.title)}</div>
+        <div class="search-hit-path">${escHtml(res.path)}</div>
+        ${res.context ? `<div class="search-hit-ctx">${highlightContext(res.context, q)}</div>` : ''}
       </div>`).join('');
+}
+
+function highlightContext(text, q) {
+  if (!q) return escHtml(text);
+  const lower = text.toLowerCase();
+  const ql    = q.toLowerCase();
+  const parts = [];
+  let i = 0;
+  while (i < text.length) {
+    const idx = lower.indexOf(ql, i);
+    if (idx === -1) { parts.push(escHtml(text.slice(i))); break; }
+    if (idx > i) parts.push(escHtml(text.slice(i, idx)));
+    parts.push(`<mark>${escHtml(text.slice(idx, idx + q.length))}</mark>`);
+    i = idx + q.length;
+  }
+  return parts.join('');
 }
 
 function pickResult(path) {
@@ -637,15 +844,107 @@ function hideSearch() {
   if (!S.isEditing) showPane('view');
 }
 
+// ── RENAME ────────────────────────────────────────────────────
+
+function showRenameModal() {
+  if (!S.currentPath) return;
+  const input = document.getElementById('rename-input');
+  input.value = S.currentPath;
+  document.getElementById('rename-overlay').classList.add('open');
+  setTimeout(() => input.focus(), 60);
+  input.onkeydown = e => {
+    if (e.key === 'Enter')  doRename();
+    if (e.key === 'Escape') closeRenameModal();
+  };
+}
+
+function closeRenameModal() {
+  document.getElementById('rename-overlay').classList.remove('open');
+}
+
+function renameOverlayClick(e) {
+  if (e.target === document.getElementById('rename-overlay')) closeRenameModal();
+}
+
+async function doRename() {
+  const newPath = document.getElementById('rename-input').value.trim();
+  if (!newPath || newPath === S.currentPath) { closeRenameModal(); return; }
+  const r = await fetch('/api/rename', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ oldPath: S.currentPath, newPath }),
+  });
+  const d = await r.json();
+  if (d.error) { alert('Rename failed: ' + d.error); return; }
+  closeRenameModal();
+  const np = d.newPath || newPath;
+  S.currentPath = np;
+  await loadTree();
+  await loadPage(np);
+}
+
+// ── UPLOAD ────────────────────────────────────────────────────
+
+function toggleUpload() {
+  const dz = document.getElementById('drop-zone');
+  dz.classList.toggle('visible');
+  if (dz.classList.contains('visible')) showPane('view');
+}
+
+function setupDropZone() {
+  const dz    = document.getElementById('drop-zone');
+  const input = document.getElementById('file-input');
+
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    doUpload([...e.dataTransfer.files]);
+  });
+
+  input.addEventListener('change', () => {
+    if (input.files.length) doUpload([...input.files]);
+    input.value = '';
+  });
+}
+
+async function doUpload(files) {
+  if (!files.length) return;
+  const dir  = S.currentPath || '';
+  const list = document.getElementById('upload-list');
+
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const r = await fetch(`/api/upload?dir=${encodeURIComponent(dir)}`, {
+        method: 'POST', body: fd,
+      });
+      const d = await r.json();
+      if (d.error) {
+        list.innerHTML += `<div class="upload-item" style="color:var(--danger)">${escHtml(file.name)}: ${escHtml(d.error)}</div>`;
+      } else {
+        list.innerHTML += `<div class="upload-item">
+          ${escHtml(d.name)} →
+          <a href="${esc(d.url)}" target="_blank">${escHtml(d.url)}</a>
+          <span class="upload-zim">{{${escHtml(d.url)}}}</span>
+        </div>`;
+      }
+    } catch (_) {
+      list.innerHTML += `<div class="upload-item" style="color:var(--danger)">${escHtml(file.name)}: upload failed</div>`;
+    }
+  }
+}
+
 // ── CREATE MODAL ─────────────────────────────────────────────
 
 function showNewModal(mode) {
   S.modalMode = mode;
-  document.getElementById('modal-title').textContent = mode === 'page' ? 'New Page' : 'New Folder';
-  document.getElementById('modal-name-label').textContent = mode === 'page' ? 'Page name' : 'Folder name';
-  document.getElementById('modal-name').placeholder = mode === 'page' ? 'My Page' : 'My Folder';
+  document.getElementById('modal-title').textContent          = mode === 'page' ? 'New Page' : 'New Folder';
+  document.getElementById('modal-name-label').textContent     = mode === 'page' ? 'Page name' : 'Folder name';
+  document.getElementById('modal-name').placeholder           = mode === 'page' ? 'My Page'   : 'My Folder';
 
-  // Suggest parent path from current page
   let parent = '';
   if (S.currentPath) {
     const node = findNode(S.treeData, S.currentPath);
@@ -653,26 +952,21 @@ function showNewModal(mode) {
       parent = S.currentPath;
     } else {
       const parts = S.currentPath.split('/');
-      if (parts.length > 1) {
-        parts.pop();
-        parent = parts.join('/');
-      }
+      if (parts.length > 1) { parts.pop(); parent = parts.join('/'); }
     }
   }
   document.getElementById('modal-parent').value = parent;
-  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-name').value   = '';
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(() => document.getElementById('modal-name').focus(), 60);
 
   document.getElementById('modal-name').onkeydown = e => {
-    if (e.key === 'Enter') doCreate();
+    if (e.key === 'Enter')  doCreate();
     if (e.key === 'Escape') closeModal();
   };
 }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 
 function overlayClick(e) {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
@@ -681,8 +975,7 @@ function overlayClick(e) {
 async function doCreate() {
   const name = document.getElementById('modal-name').value.trim();
   if (!name) { document.getElementById('modal-name').focus(); return; }
-
-  const parent = document.getElementById('modal-parent').value.trim();
+  const parent   = document.getElementById('modal-parent').value.trim();
   const fullPath = parent ? `${parent}/${name}` : name;
 
   const r = await fetch('/api/create', {
@@ -695,34 +988,29 @@ async function doCreate() {
 
   closeModal();
   await loadTree();
-
   if (S.modalMode === 'page') {
     loadPage(fullPath);
-  } else {
-    // Expand parent if needed
-    if (parent) {
-      S.openDirs.add(parent);
-      renderTree();
-    }
+  } else if (parent) {
+    S.openDirs.add(parent);
+    renderTree();
   }
 }
 
 // ── PANE SWITCHING ────────────────────────────────────────────
 
 function showPane(which) {
-  document.getElementById('view-pane').style.display   = which === 'view'   ? '' : 'none';
-  document.getElementById('editor-pane').style.display  = which === 'editor' ? 'flex' : 'none';
-  document.getElementById('search-pane').style.display  = which === 'search' ? 'block' : 'none';
+  document.getElementById('view-pane').style.display   = which === 'view'   ? ''     : 'none';
+  document.getElementById('editor-pane').style.display = which === 'editor' ? 'flex' : 'none';
+  document.getElementById('search-pane').style.display = which === 'search' ? 'block': 'none';
+  if (which !== 'view') document.getElementById('toc-panel').classList.remove('visible');
 }
 
 // ── UTILS ─────────────────────────────────────────────────────
 
 function escHtml(s) {
   return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function esc(s) {

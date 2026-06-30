@@ -712,7 +712,7 @@ async function doCreate() {
 function showPane(which) {
   document.getElementById('view-pane').style.display   = which === 'view'   ? '' : 'none';
   document.getElementById('editor-pane').style.display  = which === 'editor' ? 'flex' : 'none';
-  document.getElementById('search-pane').style.display  = which === 'search' ? '' : 'none';
+  document.getElementById('search-pane').style.display  = which === 'search' ? 'block' : 'none';
 }
 
 // ── UTILS ─────────────────────────────────────────────────────

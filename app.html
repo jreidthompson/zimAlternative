@@ -11,6 +11,7 @@
 <link id="hl-dark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" disabled>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 <style>
+/* ── VARIABLES ── */
 :root {
   --sidebar-w: 260px;
   --header-h: 44px;
@@ -27,102 +28,76 @@
   --active-bg: #dbeafe;
   --active-text: #1d4ed8;
   --mark-bg: #fef08a;
+  --shadow: 0 4px 24px rgba(0,0,0,.12);
 }
 [data-theme="dark"] {
-  --bg: #1e1e1e;
-  --sidebar-bg: #252525;
-  --border: #3a3a3a;
-  --text: #e0e0e0;
-  --muted: #888;
-  --accent: #60a5fa;
-  --accent-dark: #3b82f6;
-  --danger: #f87171;
-  --code-bg: #2a2a2a;
-  --hover: rgba(255,255,255,0.06);
-  --active-bg: #1e3a5f;
-  --active-text: #93c5fd;
-  --mark-bg: #78350f;
+  --bg: #1e1e1e; --sidebar-bg: #252525; --border: #3a3a3a;
+  --text: #e0e0e0; --muted: #888; --accent: #60a5fa; --accent-dark: #3b82f6;
+  --danger: #f87171; --code-bg: #2a2a2a; --hover: rgba(255,255,255,.06);
+  --active-bg: #1e3a5f; --active-text: #93c5fd; --mark-bg: #78350f;
+  --shadow: 0 4px 24px rgba(0,0,0,.4);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1e1e1e;
-    --sidebar-bg: #252525;
-    --border: #3a3a3a;
-    --text: #e0e0e0;
-    --muted: #888;
-    --accent: #60a5fa;
-    --accent-dark: #3b82f6;
-    --danger: #f87171;
-    --code-bg: #2a2a2a;
-    --hover: rgba(255,255,255,0.06);
-    --active-bg: #1e3a5f;
-    --active-text: #93c5fd;
-    --mark-bg: #78350f;
+    --bg: #1e1e1e; --sidebar-bg: #252525; --border: #3a3a3a;
+    --text: #e0e0e0; --muted: #888; --accent: #60a5fa; --accent-dark: #3b82f6;
+    --danger: #f87171; --code-bg: #2a2a2a; --hover: rgba(255,255,255,.06);
+    --active-bg: #1e3a5f; --active-text: #93c5fd; --mark-bg: #78350f;
+    --shadow: 0 4px 24px rgba(0,0,0,.4);
   }
 }
+
+/* ── RESET ── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--bg);
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
+  font-size: 14px; color: var(--text); background: var(--bg);
+  display: flex; height: 100vh; overflow: hidden;
 }
 
 /* ── SIDEBAR ── */
 #sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  background: var(--sidebar-bg); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: transform .2s;
+  z-index: 50;
 }
-#sidebar-top {
-  padding: 10px 10px 8px;
-  border-bottom: 1px solid var(--border);
-}
+#sidebar-top { padding: 10px 10px 8px; border-bottom: 1px solid var(--border); }
+#sidebar-top-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
 #notebook-name {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  padding: 2px 0 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1; font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .08em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#btn-close-sidebar {
+  display: none; background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 18px; line-height: 1; padding: 0 2px;
 }
 #search-box {
-  width: 100%;
-  padding: 5px 8px;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  font-size: 13px;
-  outline: none;
-  background: var(--bg);
-  color: var(--text);
+  width: 100%; padding: 5px 8px; border: 1px solid var(--border);
+  border-radius: 5px; font-size: 13px; outline: none;
+  background: var(--bg); color: var(--text);
 }
-#search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,.25); }
-#tree {
-  flex: 1;
-  overflow-y: auto;
-  padding: 5px 0;
-  min-height: 0;
+#search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+
+/* Recently visited */
+#recent-section { border-bottom: 1px solid var(--border); padding: 4px 0; }
+#recent-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); padding: 4px 10px 2px;
 }
+.recent-item {
+  font-size: 12px; padding: 3px 10px 3px 22px; cursor: pointer;
+  color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.recent-item:hover { background: var(--hover); color: var(--text); }
+
+#tree { flex: 1; overflow-y: auto; padding: 5px 0; min-height: 0; }
 .tree-row {
-  display: flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 2px 6px;
-  margin: 1px 4px;
-  border-radius: 5px;
-  cursor: pointer;
-  user-select: none;
-  gap: 3px;
+  display: flex; align-items: center; min-height: 28px;
+  padding: 2px 6px; margin: 1px 4px; border-radius: 5px;
+  cursor: pointer; user-select: none; gap: 3px;
 }
 .tree-row:hover { background: var(--hover); }
 .tree-row.active { background: var(--active-bg); color: var(--active-text); }
@@ -134,86 +109,89 @@ body {
 .tree-children.open { display: block; }
 #sidebar-actions { border-top: 1px solid var(--border); padding: 8px; display: flex; gap: 6px; }
 
+/* ── SIDEBAR RESIZE ── */
+#sidebar-resize {
+  width: 4px; cursor: col-resize; flex-shrink: 0;
+  background: transparent; transition: background .15s; z-index: 5;
+}
+#sidebar-resize:hover, #sidebar-resize.dragging { background: var(--accent); }
+
+/* ── MOBILE SIDEBAR BACKDROP ── */
+#sidebar-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.4); z-index: 49;
+}
+
 /* ── MAIN ── */
 #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 #toolbar {
-  height: var(--header-h);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  gap: 8px;
-  flex-shrink: 0;
-  background: var(--bg);
+  height: var(--header-h); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 16px; gap: 6px;
+  flex-shrink: 0; background: var(--bg);
+}
+#btn-hamburger {
+  display: none; background: none; border: none; cursor: pointer;
+  color: var(--text); font-size: 18px; padding: 4px 6px; flex-shrink: 0;
 }
 #page-title {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--muted);
+  flex: 1; font-size: 15px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted);
+  min-width: 0;
 }
 #page-title.loaded { color: var(--text); }
-#toolbar-btns { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+#autosave-status { font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+#toolbar-btns { display: flex; gap: 5px; flex-shrink: 0; align-items: center; }
 
-/* ── CONTENT PANES ── */
+/* ── PANES ── */
 #content-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 #view-pane { flex: 1; overflow-y: auto; padding: 28px 56px 56px; }
 #view-wrapper { max-width: 780px; }
-#editor-pane { flex: 1; display: none; flex-direction: column; min-height: 0; }
+#editor-pane { flex: 1; display: none; flex-direction: row; min-height: 0; }
 #editor {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 28px 56px;
+  flex: 1; border: none; outline: none; padding: 28px 40px;
   font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.75;
-  resize: none;
-  background: var(--bg);
-  color: var(--text);
+  font-size: 13px; line-height: 1.75; resize: none;
+  background: var(--bg); color: var(--text); min-width: 0;
+}
+#split-preview {
+  display: none; flex: 1; overflow-y: auto; padding: 28px 40px;
+  border-left: 1px solid var(--border); min-width: 0;
 }
 #search-pane { display: none; flex: 1; overflow-y: auto; padding: 24px 56px; }
 
 /* ── BREADCRUMB ── */
 #breadcrumb {
-  display: none;
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
+  display: none; font-size: 12px; color: var(--muted);
+  margin-bottom: 14px; flex-wrap: wrap; align-items: center; gap: 4px;
 }
 #breadcrumb.visible { display: flex; }
 .bc-sep { color: var(--border); font-size: 14px; }
 .bc-link { color: var(--accent); cursor: pointer; }
 .bc-link:hover { text-decoration: underline; }
 
+/* ── TAG BADGES ── */
+#tags-bar { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.tag-badge {
+  font-size: 11px; padding: 2px 9px; border-radius: 10px;
+  background: var(--active-bg); color: var(--active-text);
+  cursor: pointer; user-select: none; font-weight: 500;
+}
+.tag-badge:hover { opacity: .8; }
+
 /* ── TOC ── */
 #toc-panel {
-  display: none;
-  position: fixed;
-  top: calc(var(--header-h) + 20px);
-  right: 20px;
-  width: 195px;
-  background: var(--sidebar-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  max-height: calc(100vh - var(--header-h) - 40px);
-  overflow-y: auto;
-  z-index: 10;
-  font-size: 12px;
+  display: none; position: fixed; top: calc(var(--header-h) + 20px); right: 20px;
+  width: 195px; background: var(--sidebar-bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+  max-height: calc(100vh - var(--header-h) - 40px); overflow-y: auto;
+  z-index: 10; font-size: 12px;
 }
 @media (min-width: 1200px) { #toc-panel.visible { display: block; } }
 #toc-heading { font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
 .toc-item { line-height: 1.4; margin: 3px 0; }
 .toc-item a { color: var(--text); text-decoration: none; display: block; }
 .toc-item a:hover { color: var(--accent); }
-.toc-h2 { padding-left: 0; font-weight: 500; }
+.toc-h2 { font-weight: 500; }
 .toc-h3 { padding-left: 10px; color: var(--muted); }
 .toc-h4 { padding-left: 20px; color: var(--muted); }
 
@@ -225,22 +203,15 @@ body {
 .backlink-item a { color: var(--accent); cursor: pointer; font-size: 13px; text-decoration: none; }
 .backlink-item a:hover { text-decoration: underline; }
 
-/* ── UPLOAD DROP ZONE ── */
+/* ── UPLOAD ── */
 #drop-zone {
-  display: none;
-  margin-top: 24px;
-  border: 2px dashed var(--border);
-  border-radius: 8px;
-  padding: 20px 16px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-  transition: border-color .15s, background .15s;
+  display: none; margin-top: 24px; border: 2px dashed var(--border);
+  border-radius: 8px; padding: 20px 16px; text-align: center;
+  color: var(--muted); font-size: 13px; transition: border-color .15s, background .15s;
 }
 #drop-zone.visible { display: block; }
 #drop-zone.drag-over { border-color: var(--accent); background: var(--active-bg); }
 #drop-zone input[type=file] { display: none; }
-.dz-hint { margin-bottom: 6px; }
 .dz-browse { color: var(--accent); cursor: pointer; }
 .dz-browse:hover { text-decoration: underline; }
 #upload-list { margin-top: 12px; text-align: left; }
@@ -251,15 +222,9 @@ body {
 
 /* ── BUTTONS ── */
 .btn {
-  padding: 5px 13px;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 13px;
-  background: var(--bg);
-  color: var(--text);
-  white-space: nowrap;
-  line-height: 1.4;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 5px;
+  cursor: pointer; font-size: 13px; background: var(--bg); color: var(--text);
+  white-space: nowrap; line-height: 1.4; flex-shrink: 0;
 }
 .btn:hover { background: var(--sidebar-bg); }
 .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
@@ -270,40 +235,57 @@ body {
 .btn.icon:hover { background: var(--hover); border-color: var(--border); }
 
 /* ── MODALS ── */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.35);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.4); z-index: 200;
+  align-items: flex-start; justify-content: center;
 }
-.modal-overlay.open { display: flex; }
+.overlay.open { display: flex; }
 .modal-box {
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 24px 28px;
-  width: 420px;
-  max-width: 94vw;
-  box-shadow: 0 24px 64px rgba(0,0,0,.25);
-  border: 1px solid var(--border);
+  background: var(--bg); border-radius: 10px; padding: 24px 28px;
+  width: 420px; max-width: 94vw; box-shadow: var(--shadow);
+  border: 1px solid var(--border); margin-top: 15vh;
 }
 .modal-box h3 { margin-bottom: 18px; font-size: 15px; color: var(--text); }
 .modal-field { margin-bottom: 14px; }
 .modal-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
 .modal-field input[type=text] {
-  width: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  font-size: 14px;
-  outline: none;
-  background: var(--bg);
-  color: var(--text);
+  width: 100%; padding: 7px 10px; border: 1px solid var(--border);
+  border-radius: 5px; font-size: 14px; outline: none;
+  background: var(--bg); color: var(--text);
 }
-.modal-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,.25); }
+.modal-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
 .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+/* ── QUICK-OPEN ── */
+#quickopen-box {
+  background: var(--bg); border-radius: 10px; width: 560px; max-width: 94vw;
+  max-height: 65vh; display: flex; flex-direction: column;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+  overflow: hidden; margin-top: 12vh;
+}
+#quickopen-input {
+  padding: 14px 18px; border: none; border-bottom: 1px solid var(--border);
+  font-size: 15px; outline: none; background: var(--bg); color: var(--text);
+  flex-shrink: 0;
+}
+#quickopen-list { flex: 1; overflow-y: auto; }
+.qo-item { padding: 9px 18px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.qo-item:last-child { border-bottom: none; }
+.qo-item:hover, .qo-item.selected { background: var(--active-bg); }
+.qo-item:hover .qo-title, .qo-item.selected .qo-title { color: var(--active-text); }
+.qo-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.qo-path { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.qo-empty { padding: 18px; color: var(--muted); text-align: center; }
+
+/* ── LIGHTBOX ── */
+#lightbox {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.88); z-index: 300;
+  align-items: center; justify-content: center; cursor: zoom-out;
+}
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 4px; }
 
 /* ── WIKI CONTENT ── */
 .wiki { line-height: 1.75; color: var(--text); }
@@ -315,7 +297,6 @@ body {
 .wiki p { margin: .55em 0; }
 .wiki ul, .wiki ol { margin: .4em 0 .4em 1.7em; }
 .wiki li { margin: .2em 0; }
-.wiki li.checkbox { list-style: none; margin-left: -1.4em; }
 .wiki code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: .9em; color: var(--text); }
 .wiki pre { background: var(--code-bg); padding: 14px 18px; border-radius: 7px; overflow-x: auto; margin: .8em 0; line-height: 1.5; }
 .wiki pre code { background: none; padding: 0; font-size: .875em; }
@@ -326,7 +307,9 @@ body {
 .wiki hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
 .wiki a { color: var(--accent); text-decoration: none; }
 .wiki a:hover { text-decoration: underline; }
-.wiki img { max-width: 100%; height: auto; border-radius: 4px; }
+.wiki a.broken-link { color: var(--danger); text-decoration: line-through; }
+.wiki a.broken-link::after { content: ' ✗'; font-size: .75em; }
+.wiki img { max-width: 100%; height: auto; border-radius: 4px; cursor: zoom-in; }
 .wiki strong { font-weight: 600; }
 .wiki input[type=checkbox] { cursor: default; }
 
@@ -339,14 +322,62 @@ body {
 .search-hit-ctx { font-size: 13px; color: var(--muted); line-height: 1.55; }
 .no-results { color: var(--muted); padding: 10px 0; }
 mark { background: var(--mark-bg); color: var(--text); border-radius: 2px; padding: 0 1px; }
+
+/* ── PRINT ── */
+@media print {
+  #sidebar, #sidebar-resize, #sidebar-bg, #toolbar, #toc-panel,
+  #backlinks-section, #drop-zone, #tags-bar, #lightbox,
+  .overlay, #autosave-status { display: none !important; }
+  body { display: block; height: auto; overflow: visible; }
+  #main { display: block; }
+  #content-area, #view-pane { display: block; overflow: visible; height: auto; }
+  #view-wrapper { max-width: 100%; }
+  #breadcrumb { display: none !important; }
+  .wiki { font-size: 11pt; line-height: 1.6; }
+  .wiki pre { border: 1px solid #ccc; page-break-inside: avoid; }
+  .wiki a { color: inherit; }
+  .wiki a::after { content: ' (' attr(href) ')'; font-size: .8em; color: #666; }
+  .wiki a.internal-link::after { display: none; }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; height: 100vh;
+    transform: translateX(-100%); z-index: 50;
+    box-shadow: var(--shadow);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #sidebar-bg.open { display: block; }
+  #sidebar-resize { display: none; }
+  #btn-hamburger { display: block; }
+  #btn-close-sidebar { display: block; }
+  #toc-panel { display: none !important; }
+  #view-pane { padding: 16px 20px 40px; }
+  #search-pane { padding: 16px 20px; }
+  #editor { padding: 16px 20px; }
+  #split-preview { padding: 16px 20px; }
+  .btn { padding: 5px 9px; font-size: 12px; }
+  #toolbar-btns { gap: 3px; }
+}
 </style>
 </head>
 <body>
 
+<!-- Mobile sidebar backdrop -->
+<div id="sidebar-bg" onclick="closeSidebar()"></div>
+
 <div id="sidebar">
   <div id="sidebar-top">
-    <div id="notebook-name">Loading…</div>
+    <div id="sidebar-top-row">
+      <div id="notebook-name">Loading…</div>
+      <button id="btn-close-sidebar" onclick="closeSidebar()" title="Close">✕</button>
+    </div>
     <input id="search-box" type="text" placeholder="Search notes…" autocomplete="off">
+  </div>
+  <div id="recent-section" style="display:none">
+    <div id="recent-label">Recent</div>
+    <div id="recent-list"></div>
   </div>
   <div id="tree"></div>
   <div id="sidebar-actions">
@@ -355,13 +386,19 @@ mark { background: var(--mark-bg); color: var(--text); border-radius: 2px; paddi
   </div>
 </div>
 
+<div id="sidebar-resize"></div>
+
 <div id="main">
   <div id="toolbar">
+    <button id="btn-hamburger" onclick="openSidebar()" title="Menu">☰</button>
     <div id="page-title">Select a page</div>
+    <span id="autosave-status"></span>
     <div id="toolbar-btns">
       <button class="btn icon" id="btn-theme" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+      <button class="btn" id="btn-print" onclick="printPage()" style="display:none">Print</button>
       <button class="btn" id="btn-attach" onclick="toggleUpload()" style="display:none">Attach</button>
       <button class="btn" id="btn-rename" onclick="showRenameModal()" style="display:none">Rename</button>
+      <button class="btn" id="btn-split" onclick="toggleSplit()" style="display:none">Split</button>
       <button class="btn" id="btn-edit" onclick="startEdit()" style="display:none">Edit</button>
       <button class="btn primary" id="btn-save" onclick="doSave()" style="display:none">Save</button>
       <button class="btn" id="btn-cancel" onclick="cancelEdit()" style="display:none">Cancel</button>
@@ -372,30 +409,45 @@ mark { background: var(--mark-bg); color: var(--text); border-radius: 2px; paddi
     <div id="view-pane">
       <div id="view-wrapper">
         <nav id="breadcrumb"></nav>
+        <div id="tags-bar"></div>
         <div id="view-inner"><p style="color:#aaa">Select a page from the sidebar.</p></div>
         <section id="backlinks-section"></section>
         <div id="drop-zone">
           <input type="file" id="file-input" multiple>
-          <div class="dz-hint">Drop files here to attach, or <span class="dz-browse" onclick="document.getElementById('file-input').click()">browse</span></div>
+          <div>Drop files here to attach, or <span class="dz-browse" onclick="document.getElementById('file-input').click()">browse</span></div>
           <div id="upload-list"></div>
         </div>
       </div>
     </div>
     <div id="editor-pane">
       <textarea id="editor" spellcheck="false"></textarea>
+      <div id="split-preview"><div id="split-inner" class="wiki"></div></div>
     </div>
     <div id="search-pane"></div>
   </div>
 </div>
 
-<!-- Floating TOC (shown only on wide screens) -->
+<!-- Floating TOC -->
 <div id="toc-panel">
   <div id="toc-heading">Contents</div>
   <div id="toc-list"></div>
 </div>
 
+<!-- Lightbox -->
+<div id="lightbox" onclick="hideLightbox()">
+  <img id="lightbox-img" onclick="event.stopPropagation()">
+</div>
+
+<!-- Quick-open (Ctrl+K) -->
+<div id="quickopen-overlay" class="overlay" onclick="qoClose(event)">
+  <div id="quickopen-box">
+    <input id="quickopen-input" placeholder="Go to page…" autocomplete="off" spellcheck="false">
+    <div id="quickopen-list"></div>
+  </div>
+</div>
+
 <!-- Create modal -->
-<div id="modal-overlay" class="modal-overlay" onclick="overlayClick(event)">
+<div id="modal-overlay" class="overlay" onclick="overlayClick(event)">
   <div class="modal-box">
     <h3 id="modal-title">New Page</h3>
     <div class="modal-field">
@@ -414,7 +466,7 @@ mark { background: var(--mark-bg); color: var(--text); border-radius: 2px; paddi
 </div>
 
 <!-- Rename modal -->
-<div id="rename-overlay" class="modal-overlay" onclick="renameOverlayClick(event)">
+<div id="rename-overlay" class="overlay" onclick="renameOverlayClick(event)">
   <div class="modal-box">
     <h3>Rename / Move Page</h3>
     <div class="modal-field">
@@ -439,6 +491,8 @@ const S = {
   openDirs: new Set(),
   notebookName: '',
   modalMode: 'page',
+  splitActive: false,
+  recentPages: [],
 };
 
 // ── THEME ─────────────────────────────────────────────────────
@@ -449,13 +503,11 @@ function isDark() {
   if (t === 'light') return false;
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
-
 function applyThemeUI() {
   document.getElementById('btn-theme').textContent = isDark() ? '☀️' : '🌙';
   document.getElementById('hl-light').disabled = isDark();
   document.getElementById('hl-dark').disabled  = !isDark();
 }
-
 function toggleTheme() {
   const next = isDark() ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
@@ -463,14 +515,119 @@ function toggleTheme() {
   applyThemeUI();
 }
 
+// ── MOBILE SIDEBAR ────────────────────────────────────────────
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-bg').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-bg').classList.remove('open');
+}
+
+// ── SIDEBAR RESIZE ────────────────────────────────────────────
+
+function initSidebarResize() {
+  const handle = document.getElementById('sidebar-resize');
+  let startX, startW;
+  handle.addEventListener('mousedown', e => {
+    startX = e.clientX;
+    startW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w'));
+    handle.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+    const onMove = e => {
+      const w = Math.max(160, Math.min(520, startW + e.clientX - startX));
+      document.documentElement.style.setProperty('--sidebar-w', w + 'px');
+    };
+    const onUp = () => {
+      handle.classList.remove('dragging');
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    e.preventDefault();
+  });
+}
+
+// ── RECENTLY VISITED ──────────────────────────────────────────
+
+const RECENT_MAX = 8;
+
+function loadRecent() {
+  try { S.recentPages = JSON.parse(localStorage.getItem('zimalt-recent') || '[]'); }
+  catch (_) { S.recentPages = []; }
+  renderRecent();
+}
+function addToRecent(path, title) {
+  S.recentPages = S.recentPages.filter(p => p.path !== path);
+  S.recentPages.unshift({ path, title: title || path });
+  if (S.recentPages.length > RECENT_MAX) S.recentPages.pop();
+  localStorage.setItem('zimalt-recent', JSON.stringify(S.recentPages));
+  renderRecent();
+}
+function renderRecent() {
+  const sec = document.getElementById('recent-section');
+  const list = document.getElementById('recent-list');
+  if (!S.recentPages.length) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  list.innerHTML = S.recentPages.map(p =>
+    `<div class="recent-item" onclick="loadPage('${esc(p.path)}')" title="${esc(p.path)}">${escHtml(p.title)}</div>`
+  ).join('');
+}
+
+// ── QUICK-OPEN ────────────────────────────────────────────────
+
+let qoPages = [], qoIdx = 0;
+
+function flattenTree(nodes, out = []) {
+  for (const n of (nodes || [])) {
+    if (!n.isDir || n.hasPage) out.push({ path: n.path, title: n.name });
+    if (n.isDir) flattenTree(n.children, out);
+  }
+  return out;
+}
+function showQuickOpen() {
+  qoPages = flattenTree(S.treeData);
+  qoIdx = 0;
+  document.getElementById('quickopen-input').value = '';
+  document.getElementById('quickopen-overlay').classList.add('open');
+  renderQO('');
+  setTimeout(() => document.getElementById('quickopen-input').focus(), 50);
+}
+function closeQuickOpen() { document.getElementById('quickopen-overlay').classList.remove('open'); }
+function qoClose(e) { if (e.target === document.getElementById('quickopen-overlay')) closeQuickOpen(); }
+function renderQO(q) {
+  const ql = q.toLowerCase();
+  const filtered = ql
+    ? qoPages.filter(p => p.path.toLowerCase().includes(ql) || p.title.toLowerCase().includes(ql))
+    : qoPages.slice(0, 30);
+  qoIdx = Math.min(qoIdx, Math.max(0, filtered.length - 1));
+  const list = document.getElementById('quickopen-list');
+  list.innerHTML = filtered.length
+    ? filtered.map((p, i) => `
+        <div class="qo-item${i === qoIdx ? ' selected' : ''}" onclick="qoPick('${esc(p.path)}')">
+          <div class="qo-title">${escHtml(p.title)}</div>
+          <div class="qo-path">${escHtml(p.path)}</div>
+        </div>`).join('')
+    : `<div class="qo-empty">No pages found</div>`;
+}
+function qoPick(path) { closeQuickOpen(); loadPage(path); }
+
 // ── INIT ──────────────────────────────────────────────────────
 
 async function init() {
   applyThemeUI();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyThemeUI);
+  loadRecent();
+  initSidebarResize();
+  setupLightbox();
+  setupDropZone();
+  setupAutoSave();
 
   await loadTree();
-
   const hash = location.hash.slice(1);
   loadPage(hash ? decodeURIComponent(hash) : 'Home');
 
@@ -486,23 +643,63 @@ async function init() {
     if (q.length < 2) { hideSearch(); return; }
     searchTimer = setTimeout(() => doSearch(q), 280);
   });
-
   document.getElementById('search-box').addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.target.value = ''; hideSearch(); }
   });
 
-  document.getElementById('editor').addEventListener('keydown', e => {
+  const editor = document.getElementById('editor');
+  editor.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); doSave(); }
     if (e.key === 'Escape') cancelEdit();
     if (e.key === 'Tab') {
       e.preventDefault();
-      const el = e.target, s = el.selectionStart, en = el.selectionEnd;
-      el.value = el.value.slice(0, s) + '\t' + el.value.slice(en);
-      el.selectionStart = el.selectionEnd = s + 1;
+      const s = editor.selectionStart, en = editor.selectionEnd;
+      editor.value = editor.value.slice(0, s) + '\t' + editor.value.slice(en);
+      editor.selectionStart = editor.selectionEnd = s + 1;
     }
   });
 
-  setupDropZone();
+  // Quick-open
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'p')) {
+      e.preventDefault();
+      if (document.getElementById('quickopen-overlay').classList.contains('open')) {
+        closeQuickOpen();
+      } else {
+        showQuickOpen();
+      }
+    }
+    if (e.key === 'Escape') {
+      closeQuickOpen();
+      hideLightbox();
+    }
+  });
+
+  // Quick-open keyboard nav
+  document.getElementById('quickopen-input').addEventListener('input', e => {
+    qoIdx = 0;
+    renderQO(e.target.value.trim());
+  });
+  document.getElementById('quickopen-input').addEventListener('keydown', e => {
+    const list = document.getElementById('quickopen-list');
+    const items = list.querySelectorAll('.qo-item');
+    if (e.key === 'ArrowDown') {
+      qoIdx = Math.min(qoIdx + 1, items.length - 1);
+      renderQO(document.getElementById('quickopen-input').value.trim());
+      items[qoIdx]?.scrollIntoView({ block: 'nearest' });
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      qoIdx = Math.max(qoIdx - 1, 0);
+      renderQO(document.getElementById('quickopen-input').value.trim());
+      items[qoIdx]?.scrollIntoView({ block: 'nearest' });
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      const sel = list.querySelector('.qo-item.selected');
+      if (sel) sel.click();
+    } else if (e.key === 'Escape') {
+      closeQuickOpen();
+    }
+  });
 }
 
 // ── TREE ─────────────────────────────────────────────────────
@@ -515,15 +712,8 @@ async function loadTree() {
   document.getElementById('notebook-name').textContent = S.notebookName;
   renderTree();
 }
-
-function renderTree() {
-  document.getElementById('tree').innerHTML = renderNodes(S.treeData, 0);
-}
-
-function renderNodes(nodes, depth) {
-  return (nodes || []).map(n => renderNode(n, depth)).join('');
-}
-
+function renderTree() { document.getElementById('tree').innerHTML = renderNodes(S.treeData, 0); }
+function renderNodes(nodes, depth) { return (nodes || []).map(n => renderNode(n, depth)).join(''); }
 function renderNode(n, depth) {
   const pad = 6 + depth * 15;
   const active = S.currentPath === n.path ? ' active' : '';
@@ -540,47 +730,38 @@ function renderNode(n, depth) {
     <div class="tree-children${open ? ' open' : ''}" id="${tid}">
       ${renderNodes(n.children, depth + 1)}
     </div>`;
-  } else {
-    return `<div class="tree-row${active}" style="padding-left:${pad + 17}px"
-        data-path="${esc(n.path)}"
-        onclick="treeRowClick(event,this)">
-      <span class="tree-icon">📄</span>
-      <span class="tree-label">${escHtml(n.name)}</span>
-    </div>`;
   }
+  return `<div class="tree-row${active}" style="padding-left:${pad + 17}px"
+      data-path="${esc(n.path)}" onclick="treeRowClick(event,this)">
+    <span class="tree-icon">📄</span>
+    <span class="tree-label">${escHtml(n.name)}</span>
+  </div>`;
 }
-
 function treeRowClick(ev, el) {
-  const path = el.dataset.path;
-  const isDir = el.dataset.dir === '1';
-  const hasPage = el.dataset.haspage === '1';
+  const path = el.dataset.path, isDir = el.dataset.dir === '1', hasPage = el.dataset.haspage === '1';
   if (isDir) { toggleDir(path, el); if (hasPage) loadPage(path); }
-  else { loadPage(path); }
+  else loadPage(path);
 }
-
 function toggleDir(path, el) {
   const tid = `tc-${path.replace(/\//g, '__')}`;
   const child = document.getElementById(tid);
-  const toggle = el.querySelector('.tree-toggle');
-  const icon   = el.querySelector('.tree-icon');
+  const toggle = el.querySelector('.tree-toggle'), icon = el.querySelector('.tree-icon');
   if (S.openDirs.has(path)) {
     S.openDirs.delete(path);
-    if (child) child.classList.remove('open');
+    child?.classList.remove('open');
     if (toggle) toggle.textContent = '▸';
     if (icon)   icon.textContent   = '📁';
   } else {
     S.openDirs.add(path);
-    if (child) child.classList.add('open');
+    child?.classList.add('open');
     if (toggle) toggle.textContent = '▾';
     if (icon)   icon.textContent   = '📂';
   }
 }
-
 function setActiveTree(path) {
   document.querySelectorAll('.tree-row.active').forEach(el => el.classList.remove('active'));
   document.querySelectorAll(`.tree-row[data-path="${CSS.escape(path)}"]`).forEach(el => el.classList.add('active'));
 }
-
 function autoExpand(path) {
   const parts = path.split('/');
   let cum = '';
@@ -588,13 +769,11 @@ function autoExpand(path) {
     cum = cum ? `${cum}/${parts[i]}` : parts[i];
     if (!S.openDirs.has(cum)) {
       S.openDirs.add(cum);
-      const tid = `tc-${cum.replace(/\//g, '__')}`;
-      const child = document.getElementById(tid);
+      const child = document.getElementById(`tc-${cum.replace(/\//g, '__')}`);
       const row   = document.querySelector(`.tree-row[data-path="${CSS.escape(cum)}"]`);
-      if (child) child.classList.add('open');
+      child?.classList.add('open');
       if (row) {
-        const t = row.querySelector('.tree-toggle');
-        const ic = row.querySelector('.tree-icon');
+        const t = row.querySelector('.tree-toggle'), ic = row.querySelector('.tree-icon');
         if (t)  t.textContent  = '▾';
         if (ic) ic.textContent = '📂';
       }
@@ -602,12 +781,14 @@ function autoExpand(path) {
   }
 }
 
-// ── PAGE LOAD / DISPLAY ──────────────────────────────────────
+// ── PAGE LOAD ─────────────────────────────────────────────────
 
 async function loadPage(path) {
   if (S.isEditing && !confirm('Discard unsaved changes?')) return;
   S.isEditing = false;
+  cancelAutoSave();
   hideSearch();
+  closeSidebar();
 
   S.currentPath = path;
   location.hash = encodeURIComponent(path);
@@ -622,15 +803,17 @@ async function loadPage(path) {
   titleEl.textContent = d.title || path;
   titleEl.className = 'loaded';
 
+  addToRecent(path, d.title || path);
   setView(d.html, d.exists);
   renderBreadcrumb(path);
+  renderTags(d.tags || []);
+  markBrokenLinks(d.brokenLinks || []);
   loadTOC();
   loadBacklinks(path);
 }
 
 function setView(htmlContent, exists) {
   document.getElementById('view-inner').innerHTML = `<div class="wiki">${htmlContent}</div>`;
-
   document.querySelectorAll('.internal-link').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
@@ -638,25 +821,16 @@ function setView(htmlContent, exists) {
       if (href.startsWith('/page/')) loadPage(decodeURIComponent(href.slice(6)));
     });
   });
-
   if (window.hljs) {
     document.querySelectorAll('#view-inner pre code').forEach(el => hljs.highlightElement(el));
   }
-
-  // Hide upload list when switching pages
   document.getElementById('drop-zone').classList.remove('visible');
   document.getElementById('upload-list').innerHTML = '';
-
   showPane('view');
-  document.getElementById('btn-edit').style.display   = '';
-  document.getElementById('btn-attach').style.display = '';
-  document.getElementById('btn-rename').style.display = '';
-  document.getElementById('btn-delete').style.display = exists ? '' : 'none';
-  document.getElementById('btn-save').style.display   = 'none';
-  document.getElementById('btn-cancel').style.display = 'none';
+  setToolbarMode(exists ? 'view-exists' : 'view-new');
 }
 
-// ── BREADCRUMBS ───────────────────────────────────────────────
+// ── BREADCRUMB ────────────────────────────────────────────────
 
 function renderBreadcrumb(path) {
   const bc = document.getElementById('breadcrumb');
@@ -666,36 +840,48 @@ function renderBreadcrumb(path) {
   for (let i = 0; i < parts.length - 1; i++) {
     cum = cum ? `${cum}/${parts[i]}` : parts[i];
     const cp = cum;
-    html += `<span class="bc-link" onclick="loadPage('${esc(cp)}')">${escHtml(parts[i].replace(/_/g,' '))}</span>`;
+    html += `<span class="bc-link" onclick="loadPage('${esc(cp)}')">${escHtml(parts[i].replace(/_/g, ' '))}</span>`;
     html += `<span class="bc-sep">›</span>`;
   }
   bc.innerHTML = html;
   bc.classList.add('visible');
 }
 
-// ── TABLE OF CONTENTS ─────────────────────────────────────────
+// ── TAGS ──────────────────────────────────────────────────────
+
+function renderTags(tags) {
+  const bar = document.getElementById('tags-bar');
+  bar.innerHTML = (tags || []).map(t =>
+    `<span class="tag-badge" onclick="doSearch('@${esc(t)}')">#${escHtml(t)}</span>`
+  ).join('');
+}
+
+// ── BROKEN LINKS ──────────────────────────────────────────────
+
+function markBrokenLinks(links) {
+  (links || []).forEach(p => {
+    document.querySelectorAll(`#view-inner .internal-link[href="/page/${p}"]`)
+      .forEach(el => el.classList.add('broken-link'));
+  });
+}
+
+// ── TOC ───────────────────────────────────────────────────────
 
 function loadTOC() {
   const panel = document.getElementById('toc-panel');
-  const list  = document.getElementById('toc-list');
   const headings = [...document.querySelectorAll('#view-inner h1,#view-inner h2,#view-inner h3,#view-inner h4')];
-
   if (headings.length < 3) { panel.classList.remove('visible'); return; }
-
-  list.innerHTML = headings.map(h => {
+  document.getElementById('toc-list').innerHTML = headings.map(h => {
     const lvl = h.tagName[1];
-    const id  = h.id || '';
     return `<div class="toc-item toc-h${lvl}">
-      <a href="#${esc(id)}" onclick="scrollTo(event,'${esc(id)}')">${escHtml(h.textContent)}</a>
+      <a href="#${esc(h.id)}" onclick="tocScroll(event,'${esc(h.id)}')">${escHtml(h.textContent)}</a>
     </div>`;
   }).join('');
   panel.classList.add('visible');
 }
-
-function scrollTo(e, id) {
+function tocScroll(e, id) {
   e.preventDefault();
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── BACKLINKS ─────────────────────────────────────────────────
@@ -716,7 +902,93 @@ async function loadBacklinks(path) {
   } catch (_) {}
 }
 
-// ── EDIT / SAVE ───────────────────────────────────────────────
+// ── LIGHTBOX ──────────────────────────────────────────────────
+
+function setupLightbox() {
+  document.addEventListener('click', e => {
+    if (e.target.matches('.wiki img') && !e.target.closest('#split-preview')) {
+      document.getElementById('lightbox-img').src = e.target.src;
+      document.getElementById('lightbox-img').alt = e.target.alt || '';
+      document.getElementById('lightbox').classList.add('open');
+    }
+  });
+}
+function hideLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+// ── AUTO-SAVE ─────────────────────────────────────────────────
+
+let autoSaveTimer = null;
+
+function setupAutoSave() {
+  document.getElementById('editor').addEventListener('input', () => {
+    scheduleSplitUpdate();
+    showSaveStatus('');
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(async () => {
+      if (!S.isEditing || !S.currentPath) return;
+      showSaveStatus('Saving…');
+      await doSave({ silent: true });
+      showSaveStatus('Auto-saved');
+      setTimeout(() => { if (document.getElementById('autosave-status').textContent === 'Auto-saved') showSaveStatus(''); }, 3000);
+    }, 30000);
+  });
+}
+function cancelAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = null;
+  showSaveStatus('');
+}
+function showSaveStatus(msg) {
+  document.getElementById('autosave-status').textContent = msg;
+}
+
+// ── SPLIT VIEW ────────────────────────────────────────────────
+
+let splitDebounce = null;
+
+function toggleSplit() {
+  S.splitActive = !S.splitActive;
+  const pane    = document.getElementById('editor-pane');
+  const preview = document.getElementById('split-preview');
+  const btn     = document.getElementById('btn-split');
+  if (S.splitActive) {
+    pane.style.flexDirection = 'row';
+    preview.style.display = 'flex';
+    btn.classList.add('primary');
+    updateSplitPreview();
+  } else {
+    pane.style.flexDirection = '';
+    preview.style.display = 'none';
+    btn.classList.remove('primary');
+  }
+}
+function deactivateSplit() {
+  if (!S.splitActive) return;
+  S.splitActive = false;
+  document.getElementById('editor-pane').style.flexDirection = '';
+  document.getElementById('split-preview').style.display = 'none';
+  document.getElementById('btn-split').classList.remove('primary');
+}
+function scheduleSplitUpdate() {
+  if (!S.splitActive) return;
+  clearTimeout(splitDebounce);
+  splitDebounce = setTimeout(updateSplitPreview, 600);
+}
+async function updateSplitPreview() {
+  if (!S.splitActive || !S.currentPath) return;
+  const content = document.getElementById('editor').value;
+  try {
+    const r = await fetch(`/api/render?path=${encodeURIComponent(S.currentPath)}`, {
+      method: 'POST', body: content,
+    });
+    const d = await r.json();
+    const inner = document.getElementById('split-inner');
+    inner.innerHTML = d.html || '';
+    if (window.hljs) inner.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  } catch (_) {}
+}
+
+// ── EDIT / SAVE / CANCEL ──────────────────────────────────────
 
 function startEdit() {
   S.isEditing = true;
@@ -730,33 +1002,37 @@ function startEdit() {
   document.getElementById('editor').value = content;
   showPane('editor');
   document.getElementById('editor').focus();
-  document.getElementById('btn-edit').style.display   = 'none';
-  document.getElementById('btn-attach').style.display = 'none';
-  document.getElementById('btn-rename').style.display = 'none';
-  document.getElementById('btn-delete').style.display = 'none';
-  document.getElementById('btn-save').style.display   = '';
-  document.getElementById('btn-cancel').style.display = '';
+  setToolbarMode('edit');
 }
 
-async function doSave() {
+async function doSave(opts = {}) {
   if (!S.currentPath) return;
+  const { silent = false } = opts;
   const content = document.getElementById('editor').value;
   const r = await fetch(`/api/save?path=${encodeURIComponent(S.currentPath)}`, {
     method: 'POST', body: content,
   });
   const d = await r.json();
-  if (d.error) { alert('Save failed: ' + d.error); return; }
+  if (d.error) { if (!silent) alert('Save failed: ' + d.error); return; }
   S.rawContent = content;
-  S.isEditing  = false;
-  document.getElementById('page-title').textContent = d.title || S.currentPath;
-  setView(d.html, true);
-  loadTOC();
-  loadBacklinks(S.currentPath);
-  await loadTree();
+  if (!silent) {
+    S.isEditing = false;
+    cancelAutoSave();
+    deactivateSplit();
+    document.getElementById('page-title').textContent = d.title || S.currentPath;
+    setView(d.html, true);
+    renderTags(d.tags || []);
+    markBrokenLinks(d.brokenLinks || []);
+    loadTOC();
+    loadBacklinks(S.currentPath);
+    await loadTree();
+  }
 }
 
 function cancelEdit() {
   S.isEditing = false;
+  cancelAutoSave();
+  deactivateSplit();
   setView(document.getElementById('view-inner').querySelector('.wiki')?.innerHTML || '', !!S.rawContent);
   loadTOC();
 }
@@ -767,30 +1043,25 @@ async function doDelete() {
   if (!S.currentPath) return;
   const node  = findNode(S.treeData, S.currentPath);
   const isDir = node && node.isDir;
-  const warn  = isDir
+  if (!confirm(isDir
     ? `Delete folder "${S.currentPath}" and all its contents? This cannot be undone.`
-    : `Delete page "${S.currentPath}"? This cannot be undone.`;
-  if (!confirm(warn)) return;
+    : `Delete page "${S.currentPath}"? This cannot be undone.`)) return;
 
   await fetch('/api/delete', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: S.currentPath, isDir: !!isDir }),
   });
 
-  S.currentPath = null;
-  S.rawContent  = '';
+  S.currentPath = null; S.rawContent = '';
   location.hash = '';
   document.getElementById('page-title').textContent = 'Select a page';
   document.getElementById('page-title').className   = '';
   document.getElementById('view-inner').innerHTML   = '<p style="color:#aaa">Page deleted.</p>';
-  document.getElementById('btn-edit').style.display   = 'none';
-  document.getElementById('btn-attach').style.display = 'none';
-  document.getElementById('btn-rename').style.display = 'none';
-  document.getElementById('btn-delete').style.display = 'none';
   document.getElementById('toc-panel').classList.remove('visible');
   document.getElementById('backlinks-section').classList.remove('visible');
   document.getElementById('breadcrumb').classList.remove('visible');
+  document.getElementById('tags-bar').innerHTML = '';
+  setToolbarMode('none');
   await loadTree();
 }
 
@@ -798,6 +1069,7 @@ async function doDelete() {
 
 async function doSearch(q) {
   showPane('search');
+  document.getElementById('search-box').value = q;
   const sp = document.getElementById('search-pane');
   sp.innerHTML = '<p style="color:#aaa">Searching…</p>';
 
@@ -820,10 +1092,8 @@ async function doSearch(q) {
 
 function highlightContext(text, q) {
   if (!q) return escHtml(text);
-  const lower = text.toLowerCase();
-  const ql    = q.toLowerCase();
-  const parts = [];
-  let i = 0;
+  const lower = text.toLowerCase(), ql = q.toLowerCase();
+  const parts = []; let i = 0;
   while (i < text.length) {
     const idx = lower.indexOf(ql, i);
     if (idx === -1) { parts.push(escHtml(text.slice(i))); break; }
@@ -839,10 +1109,7 @@ function pickResult(path) {
   hideSearch();
   loadPage(path);
 }
-
-function hideSearch() {
-  if (!S.isEditing) showPane('view');
-}
+function hideSearch() { if (!S.isEditing) showPane('view'); }
 
 // ── RENAME ────────────────────────────────────────────────────
 
@@ -852,26 +1119,15 @@ function showRenameModal() {
   input.value = S.currentPath;
   document.getElementById('rename-overlay').classList.add('open');
   setTimeout(() => input.focus(), 60);
-  input.onkeydown = e => {
-    if (e.key === 'Enter')  doRename();
-    if (e.key === 'Escape') closeRenameModal();
-  };
+  input.onkeydown = e => { if (e.key === 'Enter') doRename(); if (e.key === 'Escape') closeRenameModal(); };
 }
-
-function closeRenameModal() {
-  document.getElementById('rename-overlay').classList.remove('open');
-}
-
-function renameOverlayClick(e) {
-  if (e.target === document.getElementById('rename-overlay')) closeRenameModal();
-}
-
+function closeRenameModal() { document.getElementById('rename-overlay').classList.remove('open'); }
+function renameOverlayClick(e) { if (e.target === document.getElementById('rename-overlay')) closeRenameModal(); }
 async function doRename() {
   const newPath = document.getElementById('rename-input').value.trim();
   if (!newPath || newPath === S.currentPath) { closeRenameModal(); return; }
   const r = await fetch('/api/rename', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ oldPath: S.currentPath, newPath }),
   });
   const d = await r.json();
@@ -890,46 +1146,28 @@ function toggleUpload() {
   dz.classList.toggle('visible');
   if (dz.classList.contains('visible')) showPane('view');
 }
-
 function setupDropZone() {
-  const dz    = document.getElementById('drop-zone');
+  const dz = document.getElementById('drop-zone');
   const input = document.getElementById('file-input');
-
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('drag-over');
-    doUpload([...e.dataTransfer.files]);
-  });
-
-  input.addEventListener('change', () => {
-    if (input.files.length) doUpload([...input.files]);
-    input.value = '';
-  });
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); doUpload([...e.dataTransfer.files]); });
+  input.addEventListener('change', () => { if (input.files.length) doUpload([...input.files]); input.value = ''; });
 }
-
 async function doUpload(files) {
   if (!files.length) return;
-  const dir  = S.currentPath || '';
+  const dir = S.currentPath || '';
   const list = document.getElementById('upload-list');
-
   for (const file of files) {
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const r = await fetch(`/api/upload?dir=${encodeURIComponent(dir)}`, {
-        method: 'POST', body: fd,
-      });
+      const r = await fetch(`/api/upload?dir=${encodeURIComponent(dir)}`, { method: 'POST', body: fd });
       const d = await r.json();
       if (d.error) {
         list.innerHTML += `<div class="upload-item" style="color:var(--danger)">${escHtml(file.name)}: ${escHtml(d.error)}</div>`;
       } else {
-        list.innerHTML += `<div class="upload-item">
-          ${escHtml(d.name)} →
-          <a href="${esc(d.url)}" target="_blank">${escHtml(d.url)}</a>
-          <span class="upload-zim">{{${escHtml(d.url)}}}</span>
-        </div>`;
+        list.innerHTML += `<div class="upload-item">${escHtml(d.name)} → <a href="${esc(d.url)}" target="_blank">${escHtml(d.url)}</a><span class="upload-zim">{{${escHtml(d.url)}}}</span></div>`;
       }
     } catch (_) {
       list.innerHTML += `<div class="upload-item" style="color:var(--danger)">${escHtml(file.name)}: upload failed</div>`;
@@ -937,92 +1175,87 @@ async function doUpload(files) {
   }
 }
 
+// ── PRINT ─────────────────────────────────────────────────────
+
+function printPage() { window.print(); }
+
 // ── CREATE MODAL ─────────────────────────────────────────────
 
 function showNewModal(mode) {
   S.modalMode = mode;
-  document.getElementById('modal-title').textContent          = mode === 'page' ? 'New Page' : 'New Folder';
-  document.getElementById('modal-name-label').textContent     = mode === 'page' ? 'Page name' : 'Folder name';
-  document.getElementById('modal-name').placeholder           = mode === 'page' ? 'My Page'   : 'My Folder';
-
+  document.getElementById('modal-title').textContent      = mode === 'page' ? 'New Page' : 'New Folder';
+  document.getElementById('modal-name-label').textContent = mode === 'page' ? 'Page name' : 'Folder name';
+  document.getElementById('modal-name').placeholder       = mode === 'page' ? 'My Page'   : 'My Folder';
   let parent = '';
   if (S.currentPath) {
     const node = findNode(S.treeData, S.currentPath);
-    if (node && node.isDir) {
-      parent = S.currentPath;
-    } else {
-      const parts = S.currentPath.split('/');
-      if (parts.length > 1) { parts.pop(); parent = parts.join('/'); }
-    }
+    if (node && node.isDir) { parent = S.currentPath; }
+    else { const p = S.currentPath.split('/'); if (p.length > 1) { p.pop(); parent = p.join('/'); } }
   }
   document.getElementById('modal-parent').value = parent;
   document.getElementById('modal-name').value   = '';
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(() => document.getElementById('modal-name').focus(), 60);
-
   document.getElementById('modal-name').onkeydown = e => {
-    if (e.key === 'Enter')  doCreate();
+    if (e.key === 'Enter') doCreate();
     if (e.key === 'Escape') closeModal();
   };
 }
-
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-
-function overlayClick(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-
+function overlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 async function doCreate() {
   const name = document.getElementById('modal-name').value.trim();
   if (!name) { document.getElementById('modal-name').focus(); return; }
   const parent   = document.getElementById('modal-parent').value.trim();
   const fullPath = parent ? `${parent}/${name}` : name;
-
   const r = await fetch('/api/create', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: fullPath, isDir: S.modalMode === 'dir' }),
   });
   const d = await r.json();
   if (d.error) { alert('Error: ' + d.error); return; }
-
   closeModal();
   await loadTree();
-  if (S.modalMode === 'page') {
-    loadPage(fullPath);
-  } else if (parent) {
-    S.openDirs.add(parent);
-    renderTree();
-  }
+  if (S.modalMode === 'page') loadPage(fullPath);
+  else if (parent) { S.openDirs.add(parent); renderTree(); }
 }
 
 // ── PANE SWITCHING ────────────────────────────────────────────
 
 function showPane(which) {
-  document.getElementById('view-pane').style.display   = which === 'view'   ? ''     : 'none';
-  document.getElementById('editor-pane').style.display = which === 'editor' ? 'flex' : 'none';
-  document.getElementById('search-pane').style.display = which === 'search' ? 'block': 'none';
+  document.getElementById('view-pane').style.display    = which === 'view'   ? ''      : 'none';
+  document.getElementById('editor-pane').style.display  = which === 'editor' ? 'flex'  : 'none';
+  document.getElementById('search-pane').style.display  = which === 'search' ? 'block' : 'none';
   if (which !== 'view') document.getElementById('toc-panel').classList.remove('visible');
+}
+
+function setToolbarMode(mode) {
+  // mode: 'view-exists' | 'view-new' | 'edit' | 'none'
+  const show = (id, v) => { document.getElementById(id).style.display = v ? '' : 'none'; };
+  const view = mode === 'view-exists' || mode === 'view-new';
+  const edit = mode === 'edit';
+  show('btn-print',  view);
+  show('btn-attach', view);
+  show('btn-rename', view);
+  show('btn-edit',   view);
+  show('btn-delete', mode === 'view-exists');
+  show('btn-split',  edit);
+  show('btn-save',   edit);
+  show('btn-cancel', edit);
 }
 
 // ── UTILS ─────────────────────────────────────────────────────
 
 function escHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
-function esc(s) {
-  return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
+function esc(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function findNode(nodes, path) {
   if (!nodes) return null;
   for (const n of nodes) {
     if (n.path === path) return n;
-    const found = findNode(n.children, path);
-    if (found) return found;
+    const f = findNode(n.children, path);
+    if (f) return f;
   }
   return null;
 }

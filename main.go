@@ -69,6 +69,7 @@ var (
 	reLink      = regexp.MustCompile(`\[\[([^\]]+)\]\]`)
 	reBareURL   = regexp.MustCompile(`(?:https?|ftp)://[^\s<>"')\]]+[^\s<>"')\].,]`)
 	reAnchorID  = regexp.MustCompile(`[^\w\-]`)
+	reTag        = regexp.MustCompile(`@(\w+)`)
 )
 
 // ============================================================
@@ -545,6 +546,40 @@ func buildTree(dirPath, relPath string) []TreeNode {
 	return nodes
 }
 
+func extractTags(content string) []string {
+	seen := make(map[string]bool)
+	var tags []string
+	for _, m := range reTag.FindAllStringSubmatch(content, -1) {
+		t := strings.ToLower(m[1])
+		if !seen[t] {
+			seen[t] = true
+			tags = append(tags, t)
+		}
+	}
+	return tags
+}
+
+func findBrokenLinks(notebookPath, content string) []string {
+	var broken []string
+	for _, m := range reLink.FindAllStringSubmatch(content, -1) {
+		inner := m[1]
+		target := inner
+		if i := strings.Index(inner, "|"); i >= 0 {
+			target = strings.TrimSpace(inner[:i])
+		}
+		target = strings.TrimSpace(target)
+		if strings.Contains(target, "://") || strings.HasPrefix(target, "mailto:") {
+			continue
+		}
+		targetPath := strings.ReplaceAll(target, ":", "/")
+		fp := getPageFilePath(notebookPath, targetPath)
+		if _, err := os.Stat(fp); os.IsNotExist(err) {
+			broken = append(broken, targetPath)
+		}
+	}
+	return broken
+}
+
 func findBacklinks(notebookPath, pagePath string) []SearchResult {
 	parts := strings.Split(pagePath, "/")
 	pageName := parts[len(parts)-1]
@@ -700,7 +735,9 @@ func (s *srv) api(w http.ResponseWriter, r *http.Request) {
 			title := displayName(parts[len(parts)-1])
 			jsonOK(w, map[string]interface{}{
 				"path": pagePath, "exists": false, "raw": "", "title": title,
-				"html": "<p style='color:#888'><em>This page does not exist yet. Click <strong>Edit</strong> to create it.</em></p>",
+				"html":         "<p style='color:#888'><em>This page does not exist yet. Click <strong>Edit</strong> to create it.</em></p>",
+				"tags":         []string{},
+				"brokenLinks":  []string{},
 			})
 			return
 		}
@@ -710,9 +747,15 @@ func (s *srv) api(w http.ResponseWriter, r *http.Request) {
 			parts := strings.Split(pagePath, "/")
 			title = displayName(parts[len(parts)-1])
 		}
+		tags := extractTags(content)
+		broken := findBrokenLinks(s.notebookPath, content)
+		if tags == nil { tags = []string{} }
+		if broken == nil { broken = []string{} }
 		jsonOK(w, map[string]interface{}{
 			"path": pagePath, "exists": true, "raw": content, "title": title,
-			"html": zimToHTML(content, s.notebookPath, pagePath),
+			"html":        zimToHTML(content, s.notebookPath, pagePath),
+			"tags":        tags,
+			"brokenLinks": broken,
 		})
 
 	case "save":
@@ -740,9 +783,15 @@ func (s *srv) api(w http.ResponseWriter, r *http.Request) {
 			parts := strings.Split(pagePath, "/")
 			title = displayName(parts[len(parts)-1])
 		}
+		tags := extractTags(content)
+		broken := findBrokenLinks(s.notebookPath, content)
+		if tags == nil { tags = []string{} }
+		if broken == nil { broken = []string{} }
 		jsonOK(w, map[string]interface{}{
 			"ok": true, "title": title,
-			"html": zimToHTML(content, s.notebookPath, pagePath),
+			"html":        zimToHTML(content, s.notebookPath, pagePath),
+			"tags":        tags,
+			"brokenLinks": broken,
 		})
 
 	case "create":
@@ -807,6 +856,19 @@ func (s *srv) api(w http.ResponseWriter, r *http.Request) {
 			results = []SearchResult{}
 		}
 		jsonOK(w, results)
+
+	case "render":
+		if r.Method != "POST" {
+			http.Error(w, "POST required", http.StatusMethodNotAllowed); return
+		}
+		pagePath := r.URL.Query().Get("path")
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			jsonErr(w, err.Error()); return
+		}
+		jsonOK(w, map[string]string{
+			"html": zimToHTML(string(body), s.notebookPath, pagePath),
+		})
 
 	case "backlinks":
 		pagePath := r.URL.Query().Get("path")
